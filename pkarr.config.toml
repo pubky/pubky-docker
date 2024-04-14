@@ -1,0 +1,11 @@
+relay_port = 6882
+dht_port = 6882
+cache_path = "/cache"
+cache_size = 1_000_000
+resolvers = []
+minimum_ttl = 300
+maximum_ttl = 86400
+[rate_limiter]
+behind_proxy = false
+per_second = 2
+burst_size = 10

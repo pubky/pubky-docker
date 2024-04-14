@@ -1,0 +1,24 @@
+[api]
+name = "nexusd.api"
+public_addr = "127.0.0.1:8080"
+
+[watcher]
+name = "nexusd.watcher"
+testnet = true
+testnet_host = "homeserver"
+homeserver = "8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo"
+events_limit = 1000
+watcher_sleep = 100
+moderation_id = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+moderated_tags = []
+
+[stack]
+log_level = "debug"
+files_path = "/static/files/"
+
+[stack.db]
+redis = "redis://localhost:6379"
+
+[stack.db.neo4j]
+uri = "bolt://localhost:7687"
+password = "12345678"

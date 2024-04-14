@@ -1,0 +1,122 @@
+services:
+  # 1. Pkarr server
+  pkarr:
+    container_name: pkarr
+    build:
+      context: ../pkarr
+    volumes:
+      - ./pkarr.config.toml:/config.toml
+      - .storage/pkarr:/cache
+    command: pkarr-server --config=/config.toml
+    # networks:
+    #   - default
+    # ports:
+    #   - 6882:6882
+    network_mode: host
+
+  # 2. Pubky Homeserver
+  homeserver:
+    container_name: homeserver
+    restart: always
+    build:
+      context: ../pubky-core
+    volumes:
+      - ./homeserver.config.toml:/config.toml
+      - ./homeserver.entrypoint.sh:/entrypoint.sh
+      - .storage/homeserver:/homeserver
+    env_file:
+      - ./.env
+    entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
+    # networks:
+    #   - default
+    # ports:
+    #   - 6287:6287
+    #  depends_on:
+    #  - pkarr
+    network_mode: host
+
+  # 3 Nexus
+  # 3.1 Pubky Nexus Daemon
+  nexusd:
+    container_name: nexusd
+    build:
+      context: ../pubky-nexus
+    # Simplified internal config path
+    command: nexusd --config-dir=/config
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
+      # Mount the config file
+      - ./pubky-nexus-config-${NETWORK:-testnet}.toml:/config/config.toml
+    # ports:
+    #   - 8080:8080
+    # networks:
+    #   - default
+    network_mode: host
+    depends_on:
+      - nexus-neo4j
+      - nexus-redis
+
+  # 3.2 Pubky Nexus Graph
+  nexus-neo4j:
+    image: neo4j:5.26.7-community
+    container_name: nexus-neo4j
+    restart: unless-stopped
+    # ports: 
+    #   - 7474:7474
+    #   - 7687:7687
+    # networks:
+    #   - default
+    network_mode: host
+    volumes:
+      # Mount the neo4j configuration file to container    
+      - .storage/neo4j/conf:/conf
+      # Mount the data to container
+      - .storage/neo4j/data:/data
+      - .storage/neo4j/logs:/logs
+      - ./pubky-nexus/docker/db-graph:/db-graph
+    env_file:
+      - ./neo4j.env
+
+  # 3.3 Pubky Nexus Index
+  nexus-redis:
+    image: redis/redis-stack:7.2.0-v11
+    container_name: nexus-redis
+    # ports:
+    #   - 6379:6379
+    #   - 8001:8001 # Redis Insight http://localhost:8001/
+    # networks:
+    #   - default
+    network_mode: host
+    volumes:
+      - .storage/redis/data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    restart: always
+
+  # 4. Pubky.app Social UI
+  client:
+    container_name: client
+    build:
+      context: ../pubky-app
+      args:
+        NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
+        NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
+        NEXT_PUBLIC_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
+        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${HTTP_RELAY:-http://localhost:15412/link/}
+        NEXT_PUBLIC_PKARR_RELAYS: ${NEXT_PUBLIC_PKARR_RELAYS:-["https://pkarr.pubky.app","https://pkarr.pubky.org"]} # Ignored when using Testnet
+        NEXT_ENABLE_PLAUSIBLE: ${NEXT_ENABLE_PLAUSIBLE:-false}
+    env_file:
+      - ./.env
+    command: [ "npm", "run", "serve:prod" ]
+    # networks:
+    #   - default
+    # ports:
+    #   - 4200:4200
+    network_mode: host
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  backend_storage:

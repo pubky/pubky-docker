@@ -1,0 +1,8 @@
+[general]
+# The mode for the signup. Default: "token_required" Options:
+# "open" - anyone can signup.
+# "token_required" - a signup token is required to signup.
+signup_mode = "token_required"
+
+[pkdns]
+icann_domain = "localhost"

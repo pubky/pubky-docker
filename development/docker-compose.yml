@@ -11,7 +11,7 @@ services:
     environment:
       - TESTNET=true
       - PUBKY_SERVER_SECRET=${PUBKY_SERVER_SECRET} # Create your own app.pkarr.org
-      - PUBKY_SERVER_DOMAIN=localhost:7259
+      - PUBKY_SERVER_DOMAIN= # Leave empty if TESTNET=true
     command: [npm, run, backend]
     networks:
       - default
@@ -29,7 +29,7 @@ services:
       - ./social-ui-monorepo:/usr/src/app
       - ./skunk-works:/skunk-works
     environment:
-      - NEXT_PUBLIC_HOMESERVER=pk:${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org
+      - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org
       - NEXT_PUBLIC_PKARR_RELAY=http://localhost:7258
     command: [npx, nx, serve, web]
     networks:

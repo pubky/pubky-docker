@@ -12,7 +12,7 @@ services:
       - TESTNET=true
       - PUBKY_SERVER_SECRET=${PUBKY_SERVER_SECRET} # Create your own app.pkarr.org
       - PUBKY_SERVER_DOMAIN= # Leave empty if TESTNET=true
-    command: [npm, run, backend]
+    command: [npm, run, backend:dev]
     networks:
       - default
     ports:

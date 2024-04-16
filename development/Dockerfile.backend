@@ -29,4 +29,4 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 # The command to run the pubky server
-CMD [ "npm", "run", "backend" ]
+CMD [ "npm", "run", "backend:dev" ]

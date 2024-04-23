@@ -26,7 +26,7 @@ services:
       context: ./
       dockerfile: ./Dockerfile.web
     volumes: 
-      - ./social-ui-monorepo:/usr/src/app
+      - ./pubky-app:/usr/src/app
       - ./skunk-works:/skunk-works
     environment:
       - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org

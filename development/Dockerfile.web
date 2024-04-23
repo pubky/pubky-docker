@@ -7,8 +7,8 @@ RUN corepack enable
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy social-ui-monorepo
-COPY ./social-ui-monorepo/ ./
+# Copy pubky-app
+COPY ./pubky-app/ ./
 
 # Install dependencies
 RUN npm install

@@ -1,6 +1,6 @@
 [submodule "development/skunk-works"]
 	path = development/skunk-works
-	url = git@github.com:slashtags/skunk-works.git
+	url = git@github.com:pubky/skunk-works.git
 [submodule "development/pubky-app"]
 	path = development/pubky-app
 	url = git@github.com:synonymdev/pubky-app.git

@@ -1,0 +1,32 @@
+# Stage 1: Builder
+FROM node:21.6.2-slim as builder
+
+# Enable corepack
+RUN corepack enable
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy skunk-works
+COPY ./skunk-works ./
+
+# Install dependencies
+RUN npm install
+
+# Stage 2: Final
+FROM node:21.6.2-slim as final
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy node_modules from builder stage
+COPY --from=builder /usr/src/app/node_modules /tmp/node_modules
+
+# Entrypoint will drop all deps into the host machine's /node_modules 
+# at start up. This way IDE's tooling play well with all dependencies.
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# The command to run the pubky server
+CMD [ "npm", "run", "backend" ]

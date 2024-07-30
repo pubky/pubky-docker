@@ -1,0 +1,41 @@
+# Stage 1: Builder
+FROM node:21.6.2-slim as builder
+
+# Enable corepack
+RUN corepack enable
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy pubky-app
+COPY ./pubky-app/ ./
+
+# Install dependencies
+RUN npm install
+
+# Install @pubky/sdk and @pubky/common
+COPY ./skunk-works/ /skunk-works
+RUN cd /skunk-works; \
+    npm install; \
+    npm run link; \
+    cd /usr/src/app; \
+    npm link @pubky/sdk;
+
+# Stage 2: Final
+FROM node:21.6.2-slim as final
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy node_modules from builder stage
+COPY --from=builder /usr/src/app/node_modules /tmp/node_modules
+
+# Copy entrypoint script and make it executable
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+
+# The command to run the pubky web server
+CMD [ "npm", "run", "start:prod" ]

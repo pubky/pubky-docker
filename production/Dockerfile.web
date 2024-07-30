@@ -19,7 +19,7 @@ RUN cd /skunk-works; \
     npm install; \
     npm run link; \
     cd /usr/src/app; \
-    npm link @pubky/sdk;
+    npm link @pubky/sdk @pubky/common;
 
 # Stage 2: Final
 FROM node:21.6.2-slim as final

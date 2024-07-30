@@ -9,3 +9,16 @@ docker compose up
 ```
 
 This repo uses `skunk-works` and `social-ui-monorepo` as Git submodules as these do not have Dockerfiles themselves yet.
+
+
+## Submodules
+
+Install submodules with:
+
+```bash
+# you can sync it with the main repo
+git submodule sync
+
+# you can update it with the main repo
+git submodule update --init --recursive
+```

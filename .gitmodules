@@ -4,9 +4,9 @@
 [submodule "development/pubky-app"]
 	path = development/pubky-app
 	url = git@github.com:synonymdev/pubky-app.git
-[submodule "development/pubky-homeserver"]
-	path = development/pubky-homeserver
-	url = git@github.com:pubky/pubky-app-backend.git
 [submodule "development/pubky-nexus"]
 	path = development/pubky-nexus
 	url = git@github.com:pubky/pubky-nexus.git
+[submodule "development/pubky-homeserver"]
+	path = development/pubky-homeserver
+	url = git@github.com:pubky/pubky.git

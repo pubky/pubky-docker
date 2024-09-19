@@ -1,10 +1,5 @@
 services:
-
-  # Current Pubky stack
-  # Has two pieces: 1. Social UI and 2. Skunk-Works.
-  # Skunk works has a pkarr relay, data store, indexer, sdk, etc.
-
-  # 2. Social UI
+  # 1. Pubky.app Social UI
   web:
     container_name: web
     build:
@@ -22,31 +17,41 @@ services:
     ports:
       - 4200:4200
 
-  # 2. Skunk-works: central Pkarr relay / Data Store / Indexer / Aggregator / etc. All in one.
-  backend:
-    container_name: backend
+  # 2. Pubky Homeserver
+  homeserver:
+    container_name: homeserver
     build:
-      context: ./
-      dockerfile: Dockerfile.backend
+      context: ./pubky-homeserver
     volumes: 
-      - ./skunk-works:/usr/src/app
-      - ./storage:/usr/src/app/.storage # Real volume with prod data
-      # - backend_storage:/usr/src/app/.storage # virtual volume
-    environment:
-      - TESTNET=true
-      - PUBKY_SERVER_SECRET=${PUBKY_SERVER_SECRET} # Create your own app.pkarr.org
-      - PUBKY_SERVER_DOMAIN= # Leave empty if TESTNET=true
-    command: [npm, run, backend:dev]
+      - homeserver_storage:/usr/src/app/.storage
     networks:
       - default
     ports:
       - 7258:7258
       - 7259:7259
-  
-  # UNDER DEVELOPMENT
-  # Upcoming Pubky stack
-  # Homeserver, Indexer Watcher, Indexer Service, Neo4J and Redis.
 
+  # 3.1 Pubky Nexus Service
+  nexus-service:
+    container_name: nexus-service
+    build:
+      context: ./pubky-nexus
+    command: cd service; cargo run;
+    port:
+      - 8080:8080
+    networks:
+      - default
+
+  # 3.2 Pubky Nexus Watcher
+  nexus-watcher:
+    container_name: nexus-watcher
+    build:
+      context: ./pubky-nexus
+    image: nexus-service
+    command: cd watcher; cargo run;
+    networks:
+      - default
+
+  # 3.3 Pubky Nexus Graph
   neo4j:
     image: neo4j:5.21.2-community
     container_name: neo4j
@@ -62,7 +67,7 @@ services:
       # Mount the data to container
       - .database/neo4j/data:/data
       - .database/neo4j/logs:/logs
-      - ./pubky-nexus/docker/db-migration:/db-migration
+      - ./pubky-nexus/docker/db-graph:/db-graph
     environment:
       NEO4J_initial_dbms_default__database: ${NEO4J_DB_NAME}
       # IMPORTANT: If you change the auth params and you have already created the config files, will not take effect
@@ -76,62 +81,21 @@ services:
       NEO4J_server_memory_heap_max__size: 2G
       NEO4J_apoc_uuid_enabled: false
 
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight
-    network_mode: "host"
-
-  # redis:
-  #   image: redis/redis-stack:7.2.0-v11
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-  #     - "8001:8001"
-  #   networks:
-  #     - default
-  #   volumes:
-  #     - .database/redis/data:/data
-  #     - ./redis.conf:/usr/local/etc/redis/redis.conf
-  #   restart: always
-  #   sysctls:
-  #     - net.core.somaxconn=65535
-
-  # New homeserver in rust
-
-  # pk-homeserver:
-  #   container_name: homeserver
-  #   build:
-  #     context: ./pubky-homeserver
-  #   volumes: 
-  #     - homeserver_storage:/usr/src/app/.storage
-  #   networks:
-  #     - default
-  #   ports:
-  #     - 7258:7258
-  #     - 7259:7259
-
-  # New Pubky-nexus in rust
-
-  # pk-social-watcher:
-  #   container_name: pk-social-watcher
-  #   build:
-  #     context: ./pubky-nexus
-  #   command: cd watcher; cargo run;
-  #   networks:
-  #     - default
-
-  # pk-social-service:
-  #   container_name: pk-social-service
-  #   build:
-  #     context: ./pubky-nexus
-  #   command: cd service; cargo run;
-  #   port:
-  #     - 8080:8080
-  #   networks:
-  #     - default
-
-volumes:
-  backend_storage:
+  # 3.4 Pubky Nexus Index
+  redis:
+    image: redis/redis-stack:7.2.0-v11
+    container_name: redis
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    networks:
+      - default
+    volumes:
+      - .database/redis/data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    restart: always
+    sysctls:
+      - net.core.somaxconn=65535
 
 networks:
   default:

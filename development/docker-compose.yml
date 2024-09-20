@@ -9,7 +9,7 @@ services:
       - ./pubky-app:/usr/src/app
       - ./skunk-works:/skunk-works
     environment:
-      - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org
+      - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER}
       - NEXT_PUBLIC_PKARR_RELAY=http://localhost:7258
     command: [npx, nx, serve, web]
     networks:
@@ -23,20 +23,24 @@ services:
     build:
       context: ./pubky-homeserver
     volumes: 
-      - homeserver_storage:/usr/src/app/.storage
+      - ./homeserver.config.toml:/usr/src/app/config.toml
+      - .database/homeserver:/usr/src/app/.database/homeserver
+    command: homeserver
     networks:
       - default
     ports:
-      - 7258:7258
-      - 7259:7259
+      - 6287:6287
 
+  # 3 Nexus
   # 3.1 Pubky Nexus Service
   nexus-service:
     container_name: nexus-service
     build:
       context: ./pubky-nexus
-    command: cd service; cargo run;
-    port:
+    command: service
+    volumes:
+      - ./nexus.env:/usr/src/app/.env
+    ports:
       - 8080:8080
     networks:
       - default
@@ -47,14 +51,16 @@ services:
     build:
       context: ./pubky-nexus
     image: nexus-service
-    command: cd watcher; cargo run;
+    volumes:
+      - ./nexus.env:/usr/src/app/.env
+    command: watcher
     networks:
       - default
 
   # 3.3 Pubky Nexus Graph
-  neo4j:
+  nexus-neo4j:
     image: neo4j:5.21.2-community
-    container_name: neo4j
+    container_name: nexus-neo4j
     restart: unless-stopped
     ports: 
       - 7474:7474
@@ -82,12 +88,12 @@ services:
       NEO4J_apoc_uuid_enabled: false
 
   # 3.4 Pubky Nexus Index
-  redis:
+  nexus-redis:
     image: redis/redis-stack:7.2.0-v11
-    container_name: redis
+    container_name: nexus-redis
     ports:
-      - "6379:6379"
-      - "8001:8001"
+      - 6379:6379
+      - 8001:8001
     networks:
       - default
     volumes:

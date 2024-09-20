@@ -13,14 +13,6 @@ COPY ./pubky-app/ ./
 # Install dependencies
 RUN npm install
 
-# Install @pubky/sdk and @pubky/common
-COPY ./skunk-works/ /skunk-works
-RUN cd /skunk-works; \
-    npm install; \
-    npm run link; \
-    cd /usr/src/app; \
-    npm link @pubky/sdk @pubky/common;
-
 # Stage 2: Final
 FROM node:21.6.2-slim as final
 

@@ -1,20 +1,17 @@
 services:
-  # 1. Pubky.app Social UI
-  client:
-    container_name: client
+  # 1. Pkarr server
+  pkarr:
+    container_name: pkarr
     build:
-      context: ./pubky-app
-      args:
-        NPM_TOKEN: ${NPM_TOKEN}
+      context: ./pkarr
     volumes: 
-      - ./pubky-app:/usr/src/app
-    env_file:
-      - ./client.env
-    command: [ "npm", "run", "start:prod" ]
+      - ./pkarr.config.toml:/usr/local/bin/config.toml
+      - .database/pkarr:/cache
+    command: pkarr-server --config=./config.toml
     networks:
       - default
     ports:
-      - 4200:4200
+      - 6881:6881
 
   # 2. Pubky Homeserver
   homeserver:
@@ -81,7 +78,6 @@ services:
     env_file:
       - ./neo4j.env
 
-
   # 3.4 Pubky Nexus Index
   nexus-redis:
     image: redis/redis-stack:7.2.0-v11
@@ -97,6 +93,23 @@ services:
     restart: always
     sysctls:
       - net.core.somaxconn=65535
+
+  # 4. Pubky.app Social UI
+  client:
+    container_name: client
+    build:
+      context: ./pubky-app
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    volumes: 
+      - ./pubky-app:/usr/src/app
+    env_file:
+      - ./client.env
+    command: [ "npm", "run", "start:prod" ]
+    networks:
+      - default
+    ports:
+      - 4200:4200
 
 networks:
   default:

@@ -7,3 +7,6 @@
 [submodule "development/pubky-homeserver"]
 	path = development/pubky-homeserver
 	url = git@github.com:pubky/pubky.git
+[submodule "development/pkarr"]
+	path = development/pkarr
+	url = git@github.com:pubky/pkarr.git

@@ -1,6 +1,13 @@
-[submodule "development/skunk-works"]
-	path = development/skunk-works
-	url = git@github.com:pubky/skunk-works.git
 [submodule "development/pubky-app"]
-	path = development/pubky-app
-	url = git@github.com:synonymdev/pubky-app.git
+    path = development/pubky-app
+    url = git@github.com:synonymdev/pubky-app.git
+[submodule "development/skunk-works"]
+    path = development/skunk-works
+    url = git@github.com:synonymdev/skunk-workds.git
+[submodule "production/pubky-app"]
+    path = production/pubky-app
+    url = git@github.com:synonymdev/pubky-app.git
+[submodule "production/skunk-works"]
+    path = production/skunk-works
+    url = git@github.com:synonymdev/skunk-workds.git
+

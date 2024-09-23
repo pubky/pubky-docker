@@ -1,0 +1,45 @@
+services:
+  # Central Pkarr relay / Data Store / Indexer / Aggregator / etc. All in one.
+  backend:
+    container_name: backend
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    volumes: 
+      - ./skunk-works:/usr/src/app
+      - backend_storage:/usr/src/app/.storage
+    environment:
+      - TESTNET=true
+      - PUBKY_SERVER_SECRET=${PUBKY_SERVER_SECRET} # Create your own app.pkarr.org
+      - PUBKY_SERVER_DOMAIN= # Leave empty if TESTNET=true
+    command: [npm, run, backend]
+    networks:
+      - default
+    ports:
+      - 7258:7258
+      - 7259:7259
+      
+  # Social UI Application Demo
+  web:
+    container_name: web
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.web
+    volumes: 
+      - ./pubky-app:/usr/src/app
+      - ./skunk-works:/skunk-works
+    environment:
+      - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org
+      - NEXT_PUBLIC_PKARR_RELAY=http://localhost:7258
+    command: [npm, run, start:prod]
+    networks:
+      - default
+    ports:
+      - 4200:4200
+
+volumes:
+ backend_storage:
+
+networks:
+  default:
+    driver: bridge

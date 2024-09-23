@@ -1,21 +1,20 @@
 services:
   # 1. Pubky.app Social UI
-  # client:
-  #   container_name: client
-  #   build:
-  #     context: ./pubky-app
-  #     args:
-  #       - NPM_TOKEN: ${NPM_TOKEN}
-  #   volumes: 
-  #     - ./pubky-app:/usr/src/app
-  #   environment:
-  #     - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER}
-  #     - NEXT_PUBLIC_PKARR_RELAY=http://localhost:7258
-  #   command: [ "npm", "run", "start:prod" ]
-  #   networks:
-  #     - default
-  #   ports:
-  #     - 4200:4200
+  client:
+    container_name: client
+    build:
+      context: ./pubky-app
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    volumes: 
+      - ./pubky-app:/usr/src/app
+    env_file:
+      - ./client.env
+    command: [ "npm", "run", "start:prod" ]
+    networks:
+      - default
+    ports:
+      - 4200:4200
 
   # 2. Pubky Homeserver
   homeserver:

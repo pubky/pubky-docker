@@ -5,9 +5,9 @@ services:
     build:
       context: ./pkarr
     volumes: 
-      - ./pkarr.config.toml:/usr/local/bin/config.toml
-      - .database/pkarr:/cache
-    command: pkarr-server --config=./config.toml
+      - ./pkarr.config.toml:/config.toml
+      - .storage/pkarr:/cache
+    command: pkarr-server --config=/config.toml
     networks:
       - default
     ports:
@@ -19,9 +19,9 @@ services:
     build:
       context: ./pubky-homeserver
     volumes: 
-      - ./homeserver.config.toml:/usr/src/app/config.toml
-      - .database/homeserver:/usr/src/app/.database/homeserver
-    command: homeserver
+      - ./homeserver.config.toml:/config.toml
+      - .storage/homeserver:/homeserver
+    command: homeserver --config=/config.toml
     networks:
       - default
     ports:
@@ -34,6 +34,9 @@ services:
     build:
       context: ./pubky-nexus
     command: service
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
     env_file:
       - ./nexus.env
     ports:
@@ -49,6 +52,9 @@ services:
     container_name: nexus-watcher
     build:
       context: ./pubky-nexus
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
     env_file:
       - ./nexus.env
     command: watcher
@@ -70,10 +76,10 @@ services:
       - default
     volumes:
       # Mount the neo4j configuration file to container    
-      - .database/neo4j/conf:/conf
+      - .storage/neo4j/conf:/conf
       # Mount the data to container
-      - .database/neo4j/data:/data
-      - .database/neo4j/logs:/logs
+      - .storage/neo4j/data:/data
+      - .storage/neo4j/logs:/logs
       - ./pubky-nexus/docker/db-graph:/db-graph
     env_file:
       - ./neo4j.env
@@ -88,7 +94,7 @@ services:
     networks:
       - default
     volumes:
-      - .database/redis/data:/data
+      - .storage/redis/data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     restart: always
     sysctls:

@@ -5,5 +5,5 @@ domain = "localhost"
 # Port for the Homeserver to listen on.
 port = 6287
 # Storage directory Defaults to <System's Data Directory>
-storage = ".database/homeserver"
+storage = "/homeserver"
 testnet = true

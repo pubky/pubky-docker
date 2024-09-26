@@ -8,10 +8,11 @@ services:
       - ./pkarr.config.toml:/config.toml
       - .storage/pkarr:/cache
     command: pkarr-server --config=/config.toml
-    networks:
-      - default
-    ports:
-      - 6881:6881
+    # networks:
+    #   - default
+    # ports:
+    #   - 6881:6881
+    network_mode: host
 
   # 2. Pubky Homeserver
   homeserver:
@@ -22,10 +23,11 @@ services:
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
     command: homeserver --config=/config.toml
-    networks:
-      - default
-    ports:
-      - 6287:6287
+    # networks:
+    #   - default
+    # ports:
+    #   - 6287:6287
+    network_mode: host
 
   # 3 Nexus
   # 3.1 Pubky Nexus Service
@@ -39,10 +41,11 @@ services:
       - .storage/static:/static
     env_file:
       - ./nexus.env
-    ports:
-      - 8080:8080
-    networks:
-      - default
+    # ports:
+    #   - 8080:8080
+    # networks:
+    #   - default
+    network_mode: host
     depends_on:
       - nexus-neo4j
       - nexus-redis
@@ -58,22 +61,24 @@ services:
     env_file:
       - ./nexus.env
     command: watcher
-    networks:
-      - default
-    depends_on:
-      - nexus-neo4j
-      - nexus-redis
+    # networks:
+    #   - default
+    # depends_on:
+    #   - nexus-neo4j
+    #   - nexus-redis
+    network_mode: host
 
   # 3.3 Pubky Nexus Graph
   nexus-neo4j:
     image: neo4j:5.21.2-community
     container_name: nexus-neo4j
     restart: unless-stopped
-    ports: 
-      - 7474:7474
-      - 7687:7687
-    networks:
-      - default
+    # ports: 
+    #   - 7474:7474
+    #   - 7687:7687
+    # networks:
+    #   - default
+    network_mode: host
     volumes:
       # Mount the neo4j configuration file to container    
       - .storage/neo4j/conf:/conf
@@ -88,17 +93,16 @@ services:
   nexus-redis:
     image: redis/redis-stack:7.2.0-v11
     container_name: nexus-redis
-    ports:
-      - 6379:6379
-      - 8001:8001 # Redis Insight http://localhost:8001/
-    networks:
-      - default
+    # ports:
+    #   - 6379:6379
+    #   - 8001:8001 # Redis Insight http://localhost:8001/
+    # networks:
+    #   - default
+    network_mode: host
     volumes:
       - .storage/redis/data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     restart: always
-    sysctls:
-      - net.core.somaxconn=65535
 
   # 4. Pubky.app Social UI
   client:
@@ -112,10 +116,11 @@ services:
     env_file:
       - ./client.env
     command: [ "npm", "run", "start:prod" ]
-    networks:
-      - default
-    ports:
-      - 4200:4200
+    # networks:
+    #   - default
+    # ports:
+    #   - 4200:4200
+    network_mode: host
 
 networks:
   default:

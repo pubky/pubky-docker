@@ -111,11 +111,9 @@ services:
       context: ./pubky-app
       args:
         NPM_TOKEN: ${NPM_TOKEN}
-    volumes: 
-      - ./pubky-app:/usr/src/app
     env_file:
       - ./client.env
-    command: [ "npm", "run", "start:prod" ]
+    command: [ "npm", "run", "start:dev" ]
     # networks:
     #   - default
     # ports:

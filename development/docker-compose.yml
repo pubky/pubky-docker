@@ -1,138 +1,128 @@
 services:
-
-  # Current Pubky stack
-  # Has two pieces: 1. Social UI and 2. Skunk-Works.
-  # Skunk works has a pkarr relay, data store, indexer, sdk, etc.
-
-  # 2. Social UI
-  web:
-    container_name: web
+  # 1. Pkarr server
+  pkarr:
+    container_name: pkarr
     build:
-      context: ./
-      dockerfile: ./Dockerfile.web
+      context: ./pkarr
     volumes: 
-      - ./pubky-app:/usr/src/app
-      - ./skunk-works:/skunk-works
-    environment:
-      - NEXT_PUBLIC_HOMESERVER=${NEXT_PUBLIC_HOMESERVER} # Get the pubky for your seed from app.pkarr.org
-      - NEXT_PUBLIC_PKARR_RELAY=http://localhost:7258
-    command: [npx, nx, serve, web]
-    networks:
-      - default
-    ports:
-      - 4200:4200
+      - ./pkarr.config.toml:/config.toml
+      - .storage/pkarr:/cache
+    command: pkarr-server --config=/config.toml
+    # networks:
+    #   - default
+    # ports:
+    #   - 6881:6881
+    network_mode: host
 
-  # 2. Skunk-works: central Pkarr relay / Data Store / Indexer / Aggregator / etc. All in one.
-  backend:
-    container_name: backend
+  # 2. Pubky Homeserver
+  homeserver:
+    container_name: homeserver
     build:
-      context: ./
-      dockerfile: Dockerfile.backend
+      context: ./pubky-homeserver
     volumes: 
-      - ./skunk-works:/usr/src/app
-      - ./storage:/usr/src/app/.storage # Real volume with prod data
-      # - backend_storage:/usr/src/app/.storage # virtual volume
-    environment:
-      - TESTNET=true
-      - PUBKY_SERVER_SECRET=${PUBKY_SERVER_SECRET} # Create your own app.pkarr.org
-      - PUBKY_SERVER_DOMAIN= # Leave empty if TESTNET=true
-    command: [npm, run, backend:dev]
-    networks:
-      - default
-    ports:
-      - 7258:7258
-      - 7259:7259
-  
-  # UNDER DEVELOPMENT
-  # Upcoming Pubky stack
-  # Homeserver, Indexer Watcher, Indexer Service, Neo4J and Redis.
+      - ./homeserver.config.toml:/config.toml
+      - .storage/homeserver:/homeserver
+    command: homeserver --config=/config.toml -t pubky_homeserver=info,tower_http=info
+    # networks:
+    #   - default
+    # ports:
+    #   - 6287:6287
+    network_mode: host
 
-  neo4j:
+  # 3 Nexus
+  # 3.1 Pubky Nexus Service
+  nexus-service:
+    container_name: nexus-service
+    build:
+      context: ./pubky-nexus
+    command: service
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
+    env_file:
+      - ./nexus.env
+    # ports:
+    #   - 8080:8080
+    # networks:
+    #   - default
+    network_mode: host
+    depends_on:
+      - nexus-neo4j
+      - nexus-redis
+
+  # 3.2 Pubky Nexus Watcher
+  nexus-watcher:
+    container_name: nexus-watcher
+    build:
+      context: ./pubky-nexus
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
+    env_file:
+      - ./nexus.env
+    command: watcher
+    # networks:
+    #   - default
+    # depends_on:
+    #   - nexus-neo4j
+    #   - nexus-redis
+    network_mode: host
+
+  # 3.3 Pubky Nexus Graph
+  nexus-neo4j:
     image: neo4j:5.21.2-community
-    container_name: neo4j
+    container_name: nexus-neo4j
     restart: unless-stopped
-    ports: 
-      - 7474:7474
-      - 7687:7687
-    networks:
-      - default
+    # ports: 
+    #   - 7474:7474
+    #   - 7687:7687
+    # networks:
+    #   - default
+    network_mode: host
     volumes:
       # Mount the neo4j configuration file to container    
-      - .database/neo4j/conf:/conf
+      - .storage/neo4j/conf:/conf
       # Mount the data to container
-      - .database/neo4j/data:/data
-      - .database/neo4j/logs:/logs
-      - ./pubky-nexus/docker/db-migration:/db-migration
-    environment:
-      NEO4J_initial_dbms_default__database: ${NEO4J_DB_NAME}
-      # IMPORTANT: If you change the auth params and you have already created the config files, will not take effect
-      # To restart: docker compose down -v
-      NEO4J_AUTH: ${NEO4J_DB_USERNAME}/${NEO4J_PASSWORD}
-      # https://neo4j.com/docs/operations-manual/current/docker/configuration/
-      # Modify the default configuration
-      # Raise memory limits
-      NEO4J_server_memory_pagecache_size: 1G
-      NEO4J_server_memory_heap_initial__size: 2G
-      NEO4J_server_memory_heap_max__size: 2G
-      NEO4J_apoc_uuid_enabled: false
+      - .storage/neo4j/data:/data
+      - .storage/neo4j/logs:/logs
+      - ./pubky-nexus/docker/db-graph:/db-graph
+    env_file:
+      - ./neo4j.env
 
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight
-    network_mode: "host"
+  # 3.4 Pubky Nexus Index
+  nexus-redis:
+    image: redis/redis-stack:7.2.0-v11
+    container_name: nexus-redis
+    # ports:
+    #   - 6379:6379
+    #   - 8001:8001 # Redis Insight http://localhost:8001/
+    # networks:
+    #   - default
+    network_mode: host
+    volumes:
+      - .storage/redis/data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    restart: always
 
-  # redis:
-  #   image: redis/redis-stack:7.2.0-v11
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-  #     - "8001:8001"
-  #   networks:
-  #     - default
-  #   volumes:
-  #     - .database/redis/data:/data
-  #     - ./redis.conf:/usr/local/etc/redis/redis.conf
-  #   restart: always
-  #   sysctls:
-  #     - net.core.somaxconn=65535
-
-  # New homeserver in rust
-
-  # pk-homeserver:
-  #   container_name: homeserver
-  #   build:
-  #     context: ./pubky-homeserver
-  #   volumes: 
-  #     - homeserver_storage:/usr/src/app/.storage
-  #   networks:
-  #     - default
-  #   ports:
-  #     - 7258:7258
-  #     - 7259:7259
-
-  # New Pubky-nexus in rust
-
-  # pk-social-watcher:
-  #   container_name: pk-social-watcher
-  #   build:
-  #     context: ./pubky-nexus
-  #   command: cd watcher; cargo run;
-  #   networks:
-  #     - default
-
-  # pk-social-service:
-  #   container_name: pk-social-service
-  #   build:
-  #     context: ./pubky-nexus
-  #   command: cd service; cargo run;
-  #   port:
-  #     - 8080:8080
-  #   networks:
-  #     - default
-
-volumes:
-  backend_storage:
+  # 4. Pubky.app Social UI
+  client:
+    container_name: client
+    build:
+      context: ./pubky-app
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    env_file:
+      - ./client.env
+    command: [ "npm", "run", "start:dev" ]
+    # networks:
+    #   - default
+    # ports:
+    #   - 4200:4200
+    network_mode: host
 
 networks:
   default:
     driver: bridge
+
+volumes:
+ backend_storage:

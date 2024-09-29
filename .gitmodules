@@ -1,6 +1,3 @@
-[submodule "development/skunk-works"]
-	path = development/skunk-works
-	url = git@github.com:pubky/skunk-works.git
 [submodule "development/pubky-app"]
 	path = development/pubky-app
 	url = git@github.com:synonymdev/pubky-app.git
@@ -10,3 +7,6 @@
 [submodule "development/pubky-homeserver"]
 	path = development/pubky-homeserver
 	url = git@github.com:pubky/pubky.git
+[submodule "development/pkarr"]
+	path = development/pkarr
+	url = git@github.com:pubky/pkarr.git

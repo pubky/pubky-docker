@@ -22,7 +22,7 @@ services:
     volumes: 
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
-    command: homeserver --config=/config.toml
+    command: homeserver --config=/config.toml -t pubky_homeserver=info,tower_http=info
     # networks:
     #   - default
     # ports:

@@ -7,3 +7,7 @@ port = 6287
 # Storage directory Defaults to <System's Data Directory>
 storage = "/homeserver"
 testnet = false
+
+# event stream
+default_list_limit = 500
+max_list_limit = 10000

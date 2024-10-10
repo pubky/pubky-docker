@@ -17,6 +17,7 @@ services:
   # 2. Pubky Homeserver
   homeserver:
     container_name: homeserver
+    restart: always
     build:
       context: ./pubky-homeserver
     volumes: 
@@ -113,7 +114,7 @@ services:
         NPM_TOKEN: ${NPM_TOKEN}
     env_file:
       - ./client.env
-    command: [ "npm", "run", "start:dev" ]
+    command: ["npm", "run", "start:prod"]
     # networks:
     #   - default
     # ports:

@@ -19,7 +19,7 @@ services:
     container_name: homeserver
     restart: always
     build:
-      context: ./pubky-homeserver
+      context: ./pubky-core
     volumes: 
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
@@ -71,7 +71,7 @@ services:
 
   # 3.3 Pubky Nexus Graph
   nexus-neo4j:
-    image: neo4j:5.21.2-community
+    image: neo4j:5.24.2-community
     container_name: nexus-neo4j
     restart: unless-stopped
     # ports: 

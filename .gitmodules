@@ -4,8 +4,8 @@
 [submodule "development/pubky-nexus"]
 	path = development/pubky-nexus
 	url = git@github.com:pubky/pubky-nexus.git
-[submodule "development/pubky-homeserver"]
-	path = development/pubky-homeserver
+[submodule "development/pubky-core"]
+	path = development/pubky-core
 	url = git@github.com:pubky/pubky.git
 [submodule "development/pkarr"]
 	path = development/pkarr

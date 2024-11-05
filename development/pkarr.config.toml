@@ -1,5 +1,5 @@
-relay_port = 6880
-dht_port = 6880
+relay_port = 6881
+dht_port = 6881
 cache_path = "/cache"
 cache_size = 1_000_000
 resolvers = []

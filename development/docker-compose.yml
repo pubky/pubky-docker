@@ -110,8 +110,6 @@ services:
     container_name: client
     build:
       context: ./pubky-app
-      args:
-        NPM_TOKEN: ${NPM_TOKEN}
     env_file:
       - ./client.env
     command: ["npm", "run", "start:prod"]

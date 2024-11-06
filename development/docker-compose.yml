@@ -114,7 +114,7 @@ services:
       context: ./pubky-app
     env_file:
       - ./client.env
-    command: ["npm", "run", "start:prod"]
+    command: ["npm", "run", "serve:prod"]
     # networks:
     #   - default
     # ports:

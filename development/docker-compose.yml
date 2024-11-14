@@ -23,7 +23,7 @@ services:
     volumes: 
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
-    command: homeserver --config=/config.toml -t pubky_homeserver=info,tower_http=info
+    command: homeserver --config=/config.toml -t pubky_homeserver=debug,tower_http=debug
     # networks:
     #   - default
     # ports:
@@ -112,6 +112,10 @@ services:
     container_name: client
     build:
       context: ./pubky-app
+      args:
+        NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
+        NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
+        NEXT_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
     env_file:
       - ./client.env
     command: ["npm", "run", "serve:prod"]

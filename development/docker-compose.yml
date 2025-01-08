@@ -116,6 +116,7 @@ services:
         NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
         NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
         NEXT_PUBLIC_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
+        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${NEXT_PUBLIC_DEFAULT_HTTP_RELAY:-https://demo.httprelay.io/link/}
     env_file:
       - ./client.env
     command: ["npm", "run", "serve:prod"]

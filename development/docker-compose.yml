@@ -4,7 +4,7 @@ services:
     container_name: pkarr
     build:
       context: ./pkarr
-    volumes: 
+    volumes:
       - ./pkarr.config.toml:/config.toml
       - .storage/pkarr:/cache
     command: pkarr-server --config=/config.toml
@@ -20,10 +20,13 @@ services:
     restart: always
     build:
       context: ./pubky-core
-    volumes: 
+    volumes:
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
-    command: homeserver --config=/config.toml -t pubky_homeserver=info,tower_http=info
+      - ./homeserver.entrypoint.sh:/entrypoint.sh # Mount the entrypoint script
+    entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
+    env_file:
+      - ./.env
     # networks:
     #   - default
     # ports:
@@ -43,7 +46,7 @@ services:
       # Mount static files path
       - .storage/static:/static
     env_file:
-      - ./nexus.env
+      - ./nexus.${NETWORK:-testnet}.env
     # ports:
     #   - 8080:8080
     # networks:
@@ -62,7 +65,7 @@ services:
       # Mount static files path
       - .storage/static:/static
     env_file:
-      - ./nexus.env
+      - ./nexus.${NETWORK:-testnet}.env
     command: watcher
     # networks:
     #   - default
@@ -112,9 +115,14 @@ services:
     container_name: client
     build:
       context: ./pubky-app
+      args:
+        NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
+        NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
+        NEXT_PUBLIC_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
+        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${HTTP_RELAY:-http://localhost:15412/link/}
     env_file:
-      - ./client.env
-    command: ["npm", "run", "serve:prod"]
+      - ./.env
+    command: [ "npm", "run", "serve:prod" ]
     # networks:
     #   - default
     # ports:
@@ -126,4 +134,4 @@ networks:
     driver: bridge
 
 volumes:
- backend_storage:
+  backend_storage:

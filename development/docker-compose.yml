@@ -23,8 +23,6 @@ services:
     volumes:
       - ./homeserver.config.toml:/config.toml
       - .storage/homeserver:/homeserver
-      - ./homeserver.entrypoint.sh:/entrypoint.sh # Mount the entrypoint script
-    entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
     env_file:
       - ./.env
     # networks:

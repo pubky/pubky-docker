@@ -29,8 +29,8 @@ services:
     #   - default
     # ports:
     #   - 6287:6287
-    depends_on:
-      - pkarr
+    #  depends_on:
+    #  - pkarr
     network_mode: host
 
   # 3 Nexus

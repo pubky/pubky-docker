@@ -1,6 +1,6 @@
 [api]
 name = "nexusd.api"
-public_addr = "127.0.0.1:8080"
+public_addr = "0.0.0.0:8080"
 
 [watcher]
 name = "nexusd.watcher"
@@ -17,8 +17,8 @@ log_level = "debug"
 files_path = "/static/files/"
 
 [stack.db]
-redis = "redis://localhost:6379"
+redis = "redis://nexus-redis:6379"
 
 [stack.db.neo4j]
-uri = "bolt://localhost:7687"
+uri = "bolt://nexus-neo4j:7687"
 password = "12345678"

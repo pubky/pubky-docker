@@ -6,3 +6,7 @@ signup_mode = "token_required"
 
 [pkdns]
 icann_domain = "localhost"
+public_ip = "172.18.0.4"
+
+[derive]
+testnet_host = "homeserver"

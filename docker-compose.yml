@@ -7,12 +7,14 @@ services:
     volumes:
       - ./pkarr.config.toml:/config.toml
       - .storage/pkarr:/cache
-    command: pkarr-server --config=/config.toml
-    # networks:
-    #   - default
-    # ports:
-    #   - 6882:6882
-    network_mode: host
+    command: pkarr-relay --config=/config.toml
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.2"
+    ports:
+      - 6882:6882
+    profiles:
+      - pkarr
 
   # 2. Pubky Homeserver
   homeserver:
@@ -27,13 +29,19 @@ services:
     env_file:
       - ./.env
     entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
-    # networks:
-    #   - default
-    # ports:
-    #   - 6287:6287
-    #  depends_on:
-    #  - pkarr
-    network_mode: host
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.4"
+    ports:
+      - 6287:6287
+      - 6286:6286
+      - 6288:6288
+      - 15411:15411
+      - 15412:15412
+    depends_on:
+      pkarr:
+        condition: "service_started"
+        required: false
 
   # 3 Nexus
   # 3.1 Pubky Nexus Daemon
@@ -48,11 +56,11 @@ services:
       - .storage/static:/static
       # Mount the config file
       - ./pubky-nexus-config-${NETWORK:-testnet}.toml:/config/config.toml
-    # ports:
-    #   - 8080:8080
-    # networks:
-    #   - default
-    network_mode: host
+    ports:
+      - 8080:8080
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.3"
     depends_on:
       - nexus-neo4j
       - nexus-redis
@@ -62,14 +70,14 @@ services:
     image: neo4j:5.26.7-community
     container_name: nexus-neo4j
     restart: unless-stopped
-    # ports: 
-    #   - 7474:7474
-    #   - 7687:7687
-    # networks:
-    #   - default
-    network_mode: host
+    ports:
+      - 7474:7474
+      - 7687:7687
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.5"
     volumes:
-      # Mount the neo4j configuration file to container    
+      # Mount the neo4j configuration file to container
       - .storage/neo4j/conf:/conf
       # Mount the data to container
       - .storage/neo4j/data:/data
@@ -82,12 +90,12 @@ services:
   nexus-redis:
     image: redis/redis-stack:7.2.0-v11
     container_name: nexus-redis
-    # ports:
-    #   - 6379:6379
-    #   - 8001:8001 # Redis Insight http://localhost:8001/
-    # networks:
-    #   - default
-    network_mode: host
+    ports:
+      - 6379:6379
+      - 8001:8001 # Redis Insight http://localhost:8001/
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.6"
     volumes:
       - .storage/redis/data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
@@ -108,15 +116,20 @@ services:
     env_file:
       - ./.env
     command: [ "npm", "run", "serve:prod" ]
-    # networks:
-    #   - default
-    # ports:
-    #   - 4200:4200
-    network_mode: host
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.7"
+    ports:
+      - 4200:4200
 
 networks:
-  default:
+  pubky:
     driver: bridge
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
 
 volumes:
   backend_storage:

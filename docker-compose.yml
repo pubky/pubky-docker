@@ -58,6 +58,7 @@ services:
       - ./pubky-nexus-config-${NETWORK:-testnet}.toml:/config/config.toml
     ports:
       - 8080:8080
+      - 8081:8081
     networks:
       pubky:
         ipv4_address: "172.18.0.3"

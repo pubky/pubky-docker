@@ -1,6 +1,8 @@
 [api]
 name = "nexusd.api"
+public_ip = "172.18.0.3"
 public_addr = "0.0.0.0:8080"
+pubky_listen_socket = "0.0.0.0:8081"
 
 [watcher]
 name = "nexusd.watcher"

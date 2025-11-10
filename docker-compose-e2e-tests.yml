@@ -1,0 +1,123 @@
+services:
+  # 1. Pkarr server
+  pkarr:
+    image: "${REGISTRY}/pkarr:${PKARR_TAG}"
+    volumes:
+      - ./pkarr.config.toml:/config.toml
+      - .storage/pkarr:/cache
+    command: pkarr-relay --config=/config.toml
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.2"
+    ports:
+      - 6882:6882
+    profiles:
+      - pkarr
+
+  # 2. Pubky Homeserver
+  homeserver:
+    image: "${REGISTRY}/homeserver:${HOMESERVER_TAG}"
+    container_name: homeserver
+    restart: always
+    volumes:
+      - ./homeserver.config.toml:/config.toml
+      - ./homeserver.entrypoint.sh:/entrypoint.sh
+      - .storage/homeserver:/homeserver
+    env_file:
+      - ./.env
+    entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.4"
+    ports:
+      - 6287:6287
+      - 6286:6286
+      - 6288:6288
+      - 15411:15411
+      - 15412:15412
+    depends_on:
+      pkarr:
+        condition: "service_started"
+        required: false
+
+  # 3 Nexus
+  # 3.1 Pubky Nexus Daemon
+  nexusd:
+    image: "${REGISTRY}/pubky-nexus:${PUBKY_NEXUS_TAG}"
+    container_name: nexusd
+    command: nexusd --config-dir=/config
+    volumes:
+      # Mount static files path
+      - .storage/static:/static
+      # Mount the config file
+      - ./pubky-nexus-config-${NETWORK:-testnet}.toml:/config/config.toml
+    ports:
+      - 8080:8080
+      - 8081:8081
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.3"
+    depends_on:
+      - nexus-neo4j
+      - nexus-redis
+
+  # 3.2 Pubky Nexus Graph
+  nexus-neo4j:
+    image: neo4j:5.26.7-community
+    container_name: nexus-neo4j
+    restart: unless-stopped
+    ports:
+      - 7474:7474
+      - 7687:7687
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.5"
+    volumes:
+      # Mount the neo4j configuration file to container
+      - .storage/neo4j/conf:/conf
+      # Mount the data to container
+      - .storage/neo4j/data:/data
+      - .storage/neo4j/logs:/logs
+      - ./pubky-nexus/docker/db-graph:/db-graph
+    env_file:
+      - ./neo4j.env
+
+  # 3.3 Pubky Nexus Index
+  nexus-redis:
+    image: redis/redis-stack:7.2.0-v11
+    container_name: nexus-redis
+    ports:
+      - 6379:6379
+      - 8001:8001 # Redis Insight http://localhost:8001/
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.6"
+    volumes:
+      - .storage/redis/data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    restart: always
+
+  # 4. Pubky.app Social UI
+  client:
+    container_name: client
+    image: "${REGISTRY}/pubky-app:${PUBKY_APP_TAG}"
+    env_file:
+      - ./.env
+    command: [ "npm", "run", "serve:prod" ]
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.7"
+    ports:
+      - 4200:4200
+
+networks:
+  pubky:
+    driver: bridge
+    enable_ipv6: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
+
+volumes:
+  backend_storage:

@@ -1,7 +1,7 @@
 services:
   # 1. Pkarr server
   pkarr:
-    image: "${REGISTRY}/pkarr:${PKARR_TAG}"
+    image: "${REGISTRY:-synonymdev}/pkarr:${PKARR_TAG:-latest}"
     volumes:
       - ./pkarr.config.toml:/config.toml
       - .storage/pkarr:/cache
@@ -16,7 +16,7 @@ services:
 
   # 2. Pubky Homeserver
   homeserver:
-    image: "${REGISTRY}/homeserver:${HOMESERVER_TAG}"
+    image: "${REGISTRY:-synonymdev}/homeserver:${HOMESERVER_TAG:-latest}"
     container_name: homeserver
     restart: always
     volumes:
@@ -43,7 +43,7 @@ services:
   # 3 Nexus
   # 3.1 Pubky Nexus Daemon
   nexusd:
-    image: "${REGISTRY}/pubky-nexus:${PUBKY_NEXUS_TAG}"
+    image: "${REGISTRY:-synonymdev}/pubky-nexus:${PUBKY_NEXUS_TAG:-latest}"
     container_name: nexusd
     command: nexusd --config-dir=/config
     volumes:
@@ -100,7 +100,7 @@ services:
   # 4. Pubky.app Social UI
   client:
     container_name: client
-    image: "${REGISTRY}/pubky-app:${PUBKY_APP_TAG}"
+    image: "${REGISTRY:-synonymdev}/pubky-app:${PUBKY_APP_TAG:-latest}"
     env_file:
       - ./.env
     command: [ "npm", "run", "serve:prod" ]

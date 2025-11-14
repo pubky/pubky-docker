@@ -48,10 +48,9 @@ Clone each required repository:
 ```
 git clone https://github.com/pubky/pubky-docker.git # this repository
 git clone https://github.com/pubky/pkarr.git
-git clone https://github.com/pubky/pubky.git
+git clone https://github.com/pubky/pubky-core.git
 git clone https://github.com/pubky/pubky-nexus.git
 git clone https://github.com/pubky/pubky-app.git
-git clone https://github.com/pubky/pubky-core.git
 ```
 
 Then navigate into `pubky-docker`, configure your `.env`, and run:

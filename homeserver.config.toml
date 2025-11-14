@@ -3,6 +3,7 @@
 # "open" - anyone can signup.
 # "token_required" - a signup token is required to signup.
 signup_mode = "token_required"
+database_url ="postgres://test_user:test_pass@172.18.0.9:5432/pubky_homeserver?pubky_test=true"
 
 [pkdns]
 icann_domain = "localhost"

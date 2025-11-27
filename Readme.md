@@ -18,9 +18,32 @@ For application development, use the official client libraries instead:
 
 Only run this full orchestration if you're specifically experimenting with the complete stack with interest on the Nexus indexer and the social frontend client.
 
-## ⚙️ Setup
+## Using public docker images
 
-This repo uses `pubky/pkarr`, `pubky/pubky`, `pubky/pubky-nexus` and `pubky/pubky-app` as directly as the moment as we are not releasing Docker images just yet.
+All images are stored in public [registry](https://hub.docker.com/u/synonymsoft) and by default the latest tag is used.
+
+The image tag and registry are envinroment variables, so if needed they could be changed
+
+```
+REGISTRY - registry by default synonymsoft
+PUBKY_APP_TAG - tag for pubky-app/client by default latest
+PUBKY_NEXUS_TAG - tag for pubky-nexus by default latest
+HOMESERVER_TAG - tag for homeserver by default latest
+PKARR_TAG - tag for pkarr by default latest
+```
+
+Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
+
+Run:
+```
+docker compose up -d
+```
+
+## Building from scratch
+
+### ⚙️ Setup
+
+This repo uses `pubky/pkarr`, `pubky/pubky`, `pubky/pubky-nexus` and `pubky/pubky-app` as directly as the moment.
 
 Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
 
@@ -28,7 +51,7 @@ Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` 
 docker compose up
 ```
 
-## 📁 Directory Structure Requirement
+### 📁 Directory Structure Requirement
 
 Before running `docker compose up`, ensure the following four repositories are cloned **at the same directory level** as `pubky-docker`. This is necessary because the Docker setup references them via relative paths.
 

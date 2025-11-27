@@ -2,7 +2,7 @@ services:
   # 1. Pkarr server
   pkarr:
     container_name: pkarr
-    image: "${REGISTRY:-synonymdev}/pkarr:${PKARR_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/pkarr:${PKARR_TAG:-latest}"
     build:
       context: ../pkarr
     volumes:
@@ -41,7 +41,7 @@ services:
   # 2.2 Pubky Homeserver
   homeserver:
     container_name: homeserver
-    image: "${REGISTRY:-synonymdev}/homeserver:${HOMESERVER_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/homeserver:${HOMESERVER_TAG:-latest}"
     restart: always
     build:
       context: ../pubky-core
@@ -72,7 +72,7 @@ services:
   # 3.1 Pubky Nexus Daemon
   nexusd:
     container_name: nexusd
-    image: "${REGISTRY:-synonymdev}/pubky-nexus:${PUBKY_NEXUS_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/pubky-nexus:${PUBKY_NEXUS_TAG:-latest}"
     build:
       context: ../pubky-nexus
     # Simplified internal config path
@@ -131,7 +131,7 @@ services:
   # 4. Pubky.app Social UI
   client:
     container_name: client
-    image: "${REGISTRY:-synonymdev}/pubky-app:${PUBKY_APP_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/pubky-app-testnet:${PUBKY_APP_TAG:-latest}"
     build:
       context: ../pubky-app
       args:

@@ -131,7 +131,7 @@ services:
   # 4. Pubky.app Social UI
   client:
     container_name: client
-    image: "${REGISTRY:-synonymsoft}/pubky-app-testnet:${PUBKY_APP_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/pubky-app-${NETWORK:-testnet}:${PUBKY_APP_TAG:-latest}"
     build:
       context: ../pubky-app
       args:

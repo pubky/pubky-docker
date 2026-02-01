@@ -11,7 +11,7 @@ testnet_host = "homeserver"
 homeserver = "8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo"
 events_limit = 1000
 monitored_homeservers_limit = 50
-watcher_sleep = 100
+watcher_sleep = 250
 moderation_id = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 moderated_tags = []
 

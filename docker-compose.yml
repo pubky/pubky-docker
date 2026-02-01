@@ -128,12 +128,12 @@ services:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     restart: always
 
-  # 4. Pubky.app Social UI
-  client:
-    container_name: client
-    image: "${REGISTRY:-synonymsoft}/pubky-app-${NETWORK:-testnet}:${PUBKY_APP_TAG:-latest}"
+  # 4. Pubky Beta Social UI
+  pubky-beta:
+    container_name: pubky-beta
+    image: "${REGISTRY:-synonymsoft}/pubky-beta-${NETWORK:-testnet}:${PUBKY_BETA_TAG:-latest}"
     build:
-      context: ../pubky-app
+      context: ../pubky-beta
       args:
         NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
         NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
@@ -150,12 +150,12 @@ services:
     ports:
       - 4200:4200
 
-  # 5. Franky Social UI (replacement for pubky-app)
-  franky:
-    container_name: franky
-    image: "${REGISTRY:-synonymsoft}/franky-${NETWORK:-testnet}:${FRANKY_TAG:-latest}"
+  # 5. Pubky App Social UI
+  pubky-app:
+    container_name: pubky-app
+    image: "${REGISTRY:-synonymsoft}/pubky-app-${NETWORK:-testnet}:${PUBKY_APP_TAG:-latest}"
     build:
-      context: ../franky
+      context: ../pubky-app
       args:
         NEXT_PUBLIC_DB_VERSION: ${NEXT_PUBLIC_DB_VERSION:-2}
         NEXT_PUBLIC_DB_NAME: ${NEXT_PUBLIC_DB_NAME:-franky}

@@ -43,7 +43,7 @@ docker compose up -d
 
 ### ⚙️ Setup
 
-This repo uses `pubky/pkarr`, `pubky/pubky`, `pubky/pubky-nexus` and `pubky/pubky-app` as directly as the moment.
+This repo uses `pubky/pkarr`, `pubky/pubky-core`, `pubky/pubky-nexus` and `pubky/pubky-app` as directly as the moment.
 
 Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
 
@@ -61,7 +61,7 @@ Your directory should look like this:
 your_working_directory/
 ├── pubky-docker/ # this project!
 ├── pkarr/
-├── pubky/
+├── pubky-core/
 ├── pubky-nexus/
 ├── pubky-app/
 ```

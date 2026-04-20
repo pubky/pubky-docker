@@ -3,7 +3,7 @@
 One click setup to run locally an example full Pubky Social (App) stack. This orchestration will run:
 
 - [Pkarr relay](https://github.com/pubky/pkarr):
-- [Pubky Homeserver](https://github.com/pubky/pubky/tree/main/pubky-homeserver): Instance of pubky decentralized data storage.
+- [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver): Instance of pubky decentralized data storage.
 - [Pubky Nexus](https://github.com/pubky/pubky-nexus): aggregator and indexer of `/pub/pubky.app` data that creates a powerful social-media-like API
 - [Pubky App](https://github.com/pubky/pubky-app): client for the pubky social media app.
 
@@ -35,6 +35,7 @@ PKARR_TAG - tag for pkarr by default latest
 Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
 
 Run:
+
 ```
 docker compose up -d
 ```
@@ -61,7 +62,7 @@ Your directory should look like this:
 your_working_directory/
 ├── pubky-docker/ # this project!
 ├── pkarr/
-├── pubky/
+├── pubky-core/
 ├── pubky-nexus/
 ├── pubky-app/
 ```
@@ -84,4 +85,3 @@ cp .env-sample .env
 # edit .env to choose between mainnet or testnet
 docker compose up
 ```
-

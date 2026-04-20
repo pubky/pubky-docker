@@ -22,7 +22,7 @@ Only run this full orchestration if you're specifically experimenting with the c
 
 All images are stored in public [registry](https://hub.docker.com/u/synonymsoft) and by default the `latest` tag is used.
 
-The image tag and registry are envinroment variables, so if needed they could be changed
+The image tag and registry are environment variables, so if needed they could be changed
 
 ```
 REGISTRY - registry by default synonymsoft

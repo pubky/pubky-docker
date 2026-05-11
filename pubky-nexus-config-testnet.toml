@@ -12,7 +12,7 @@ homeserver = "8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo"
 events_limit = 1000
 monitored_homeservers_limit = 50
 watcher_sleep = 100
-moderation_id = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+moderation_id = "xw4fdy5kpc9aoowabmhqmd7wnuz3pqg7z1usse877tawtu8x7zdy"
 moderated_tags = []
 
 [stack]

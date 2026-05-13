@@ -123,9 +123,11 @@ services:
     networks:
       pubky:
         ipv4_address: "172.18.0.6"
+    environment:
+      - REDIS_ARGS=--include /usr/local/etc/redis/redis.conf
     volumes:
       - .storage/redis/data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
     restart: always
 
   # 4. Pubky.app Social UI

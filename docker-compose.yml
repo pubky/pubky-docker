@@ -125,7 +125,7 @@ services:
         ipv4_address: "172.18.0.6"
     volumes:
       - .storage/redis/data:/data
-      - ./redis.conf:/redis-stack.conf:ro
+      - ./redis-stack.conf:/redis-stack.conf:ro
     restart: always
 
   # 4. Pubky.app Social UI

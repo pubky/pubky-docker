@@ -1,24 +1,5 @@
 services:
-  # 1. Pkarr server
-  pkarr:
-    container_name: pkarr
-    image: "${REGISTRY:-synonymsoft}/pkarr:${PKARR_TAG:-latest}"
-    build:
-      context: ../pkarr
-    volumes:
-      - ./pkarr.config.toml:/config.toml
-      - .storage/pkarr:/cache
-    command: pkarr-relay --config=/config.toml
-    networks:
-      pubky:
-        ipv4_address: "172.18.0.2"
-    ports:
-      - 6882:6882
-    profiles:
-      - pkarr
-
-  # 2 Pubky Homeserver
-  # 2.1 Postgresql for Homeserver
+  # 1. PostgreSQL (shared by Homeserver and Homegate)
   postgres:
     container_name: postgres
     image: postgres:17-alpine
@@ -38,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2.2 Pubky Homeserver
+  # 2. Pubky Homeserver
   homeserver:
     container_name: homeserver
     image: "${REGISTRY:-synonymsoft}/homeserver:${HOMESERVER_TAG:-latest}"
@@ -61,14 +42,10 @@ services:
       - 15411:15411
       - 15412:15412
     depends_on:
-      pkarr:
-        condition: "service_started"
-        required: false
       postgres:
         condition: service_healthy
 
-
-  # 3 Nexus
+  # 3. Nexus
   # 3.1 Pubky Nexus Daemon
   nexusd:
     container_name: nexusd
@@ -128,29 +105,7 @@ services:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     restart: always
 
-  # 4. Pubky.app Social UI
-  client:
-    container_name: client
-    image: "${REGISTRY:-synonymsoft}/pubky-app-${NETWORK:-testnet}:${PUBKY_APP_TAG:-latest}"
-    build:
-      context: ../pubky-app
-      args:
-        NEXT_PUBLIC_HOMESERVER: ${NEXT_PUBLIC_HOMESERVER:-8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo}
-        NEXT_PUBLIC_NEXUS: ${NEXT_PUBLIC_NEXUS:-http://localhost:8080}
-        NEXT_PUBLIC_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
-        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${HTTP_RELAY:-http://localhost:15412/link/}
-        NEXT_PUBLIC_PKARR_RELAYS: ${NEXT_PUBLIC_PKARR_RELAYS:-["https://pkarr.pubky.app","https://pkarr.pubky.org"]} # Ignored when using Testnet
-        NEXT_ENABLE_PLAUSIBLE: ${NEXT_ENABLE_PLAUSIBLE:-false}
-    env_file:
-      - ./.env
-    command: [ "npm", "run", "serve:prod" ]
-    networks:
-      pubky:
-        ipv4_address: "172.18.0.7"
-    ports:
-      - 4200:4200
-
-  # 5. Franky Social UI (replacement for pubky-app)
+  # 4. Franky Social UI
   franky:
     container_name: franky
     image: "${REGISTRY:-synonymsoft}/franky-${NETWORK:-testnet}:${FRANKY_TAG:-latest}"
@@ -181,9 +136,9 @@ services:
         NEXT_PUBLIC_CDN_URL: ${NEXT_PUBLIC_CDN_URL:-http://localhost:8080/static}
         NEXT_PUBLIC_TESTNET: ${NEXT_PUBLIC_TESTNET:-true}
         NEXT_PUBLIC_PKARR_RELAYS: ${NEXT_PUBLIC_PKARR_RELAYS:-["https://pkarr.pubky.app","https://pkarr.pubky.org"]}
-        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${NEXT_PUBLIC_DEFAULT_HTTP_RELAY:-http://localhost:15412/link/}
+        NEXT_PUBLIC_DEFAULT_HTTP_RELAY: ${NEXT_PUBLIC_DEFAULT_HTTP_RELAY:-http://localhost:15412/inbox/}
         NEXT_PUBLIC_EXCHANGE_RATE_API: ${NEXT_PUBLIC_EXCHANGE_RATE_API:-https://api1.blocktank.to/api/fx/rates/btc}
-        NEXT_PUBLIC_HOMEGATE_URL: ${NEXT_PUBLIC_HOMEGATE_URL:-https://homegate.staging.pubky.app}
+        NEXT_PUBLIC_HOMEGATE_URL: ${NEXT_PUBLIC_HOMEGATE_URL:-http://localhost:6300}
         NEXT_PUBLIC_MODERATION_ID: ${NEXT_PUBLIC_MODERATION_ID:-euwmq57zefw5ynnkhh37b3gcmhs7g3cptdbw1doaxj1pbmzp3wro}
         NEXT_PUBLIC_MODERATED_TAGS: ${NEXT_PUBLIC_MODERATED_TAGS:-["nudity"]}
         BASE_URL_SUPPORT: ${BASE_URL_SUPPORT:-https://support.pubky.app}
@@ -197,6 +152,69 @@ services:
         ipv4_address: "172.18.0.8"
     ports:
       - 3000:3000
+
+  # 5. Homegate
+  # 5.1 PostgreSQL init for Homegate
+  homegate-db-init:
+    container_name: homegate-db-init
+    image: postgres:17-alpine
+    env_file:
+      - ./.env
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        export PGPASSWORD="$POSTGRES_PASSWORD"
+        until pg_isready -h postgres -U "$POSTGRES_USER" -d postgres; do
+          sleep 1
+        done
+        if ! psql -h postgres -U "$POSTGRES_USER" -d postgres -Atc "SELECT 1 FROM pg_database WHERE datname = 'pubky_homegate'" | grep -qx 1; then
+          psql -h postgres -U "$POSTGRES_USER" -d postgres -c "CREATE DATABASE pubky_homegate"
+        fi
+    restart: "no"
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.11"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 5.2 Fake Prelude API for local SMS verification
+  homegate-prelude:
+    container_name: homegate-prelude
+    image: wiremock/wiremock:latest
+    command:
+      - --global-response-templating
+    volumes:
+      - ./homegate-prelude:/home/wiremock
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.12"
+
+  # 5.3 Homegate
+  homegate:
+    container_name: homegate
+    image: "${REGISTRY:-synonymsoft}/homegate:${HOMEGATE_TAG:-latest}"
+    restart: always
+    build:
+      context: ../homegate
+    volumes:
+      - ./.storage/homegate:/data
+      - ./homegate.config.toml:/config.toml:ro
+      - ./homegate.entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: [ "/bin/sh", "-c", "/entrypoint.sh" ]
+    networks:
+      pubky:
+        ipv4_address: "172.18.0.10"
+    ports:
+      - 6300:6300
+    depends_on:
+      homeserver:
+        condition: service_started
+      homegate-db-init:
+        condition: service_completed_successfully
+      homegate-prelude:
+        condition: service_started
 
 networks:
   pubky:

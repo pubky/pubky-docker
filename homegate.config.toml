@@ -1,0 +1,34 @@
+# Local Homegate configuration for the Docker testnet stack.
+database_url = "postgres://test_user:test_pass@postgres:5432/pubky_homegate"
+http_listen_socket = "0.0.0.0:6300"
+allow_cors = true
+
+[homeserver]
+admin_api_url = "http://homeserver:6288"
+admin_password = "admin"
+
+[sms_verification]
+prelude_api_key = "docker-fake-prelude-key"
+prelude_api_url = "http://homegate-prelude:8080"
+limit_whitelist = ["+12345678912"]
+
+[ip_verification]
+max_verifications_per_week = 99999999
+max_verifications_per_year = 99999999
+
+[ip_verification.signup_quota]
+storage_quota_mb = 2
+rate_read = "1mb/s"
+rate_read_burst = 10
+rate_write = "1mb/s"
+rate_write_burst = 10
+
+# The local Docker stack exposes SMS verification through a fake Prelude stub.
+# Use the whitelisted number above and the fixed code 123456.
+#
+# Lightning verification stays disabled here because Homegate eagerly opens a
+# PhoenixD websocket on startup, so a fake URL would make the service exit.
+
+[logging]
+level = "debug"
+module_levels = ["h2=warn", "hyper_util=warn"]

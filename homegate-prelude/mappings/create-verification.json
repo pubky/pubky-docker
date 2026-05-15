@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v2/verification",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.target.value == '+12345678912')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"],
+    "body": "{\"status\":\"success\",\"id\":\"{{jsonPath request.body '$.target.value'}}\"}"
+  }
+}

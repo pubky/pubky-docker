@@ -1,0 +1,15 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v2/verification"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"],
+    "body": "{\"status\":\"blocked\",\"id\":\"{{jsonPath request.body '$.target.value'}}\",\"reason\":\"in_block_list\"}"
+  }
+}

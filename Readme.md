@@ -48,8 +48,14 @@ This setup builds directly from the `pubky/pkarr`, `pubky/pubky-core`, `pubky/pu
 
 Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
 
+To run entire stack:
 ```bash
 docker compose up
+```
+
+To run without pubky-app client:
+```bash
+docker compose --profile backend up
 ```
 
 ### 📁 Directory Structure Requirement

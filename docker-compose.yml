@@ -1,6 +1,7 @@
 services:
   # 1. PostgreSQL (shared by Homeserver and Homegate)
   postgres:
+    profiles: [backend]
     container_name: postgres
     image: postgres:17-alpine
     restart: always
@@ -21,6 +22,7 @@ services:
 
   # 2. Pubky Homeserver
   homeserver:
+    profiles: [backend]
     container_name: homeserver
     image: "${REGISTRY:-synonymsoft}/homeserver:${HOMESERVER_TAG:-latest}"
     restart: always
@@ -48,6 +50,7 @@ services:
   # 3. Nexus
   # 3.1 Pubky Nexus Daemon
   nexusd:
+    profiles: [backend]
     container_name: nexusd
     image: "${REGISTRY:-synonymsoft}/pubky-nexus:${PUBKY_NEXUS_TAG:-latest}"
     build:
@@ -71,6 +74,7 @@ services:
 
   # 3.2 Pubky Nexus Graph
   nexus-neo4j:
+    profiles: [backend]
     image: neo4j:5.26.7-community
     container_name: nexus-neo4j
     restart: unless-stopped
@@ -92,6 +96,7 @@ services:
 
   # 3.3 Pubky Nexus Index
   nexus-redis:
+    profiles: [backend]
     image: redis:8.0.6-alpine
     container_name: nexus-redis
     ports:
@@ -106,6 +111,7 @@ services:
     restart: always
 
   nexus-redisinsight:
+    profiles: [backend]
     image: redis/redisinsight:3.0.3
     container_name: nexus-redisinsight
     ports:
@@ -122,6 +128,7 @@ services:
 
   # 4. Franky Social UI
   franky:
+    profiles: [franky]
     container_name: franky
     image: "${REGISTRY:-synonymsoft}/franky-${NETWORK:-testnet}:${FRANKY_TAG:-latest}"
     build:
@@ -171,6 +178,7 @@ services:
   # 5. Homegate
   # 5.1 PostgreSQL init for Homegate
   homegate-db-init:
+    profiles: [backend]
     container_name: homegate-db-init
     image: postgres:17-alpine
     env_file:
@@ -196,6 +204,7 @@ services:
 
   # 5.2 Fake Prelude API for local SMS verification
   homegate-prelude:
+    profiles: [backend]
     container_name: homegate-prelude
     image: wiremock/wiremock:latest
     command:
@@ -208,6 +217,7 @@ services:
 
   # 5.3 Homegate
   homegate:
+    profiles: [backend]
     container_name: homegate
     image: "${REGISTRY:-synonymsoft}/homegate:${HOMEGATE_TAG:-latest}"
     restart: always

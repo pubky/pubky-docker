@@ -7,8 +7,11 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 WORKSPACE_DIR="$(dirname "$SCRIPT_DIR")"
 
 BACKEND_ONLY=false
+BUILD_SERVICES=()
+PREPARED_COMMITS=()
 
 readonly GITHUB_CHECK_REPO="https://github.com/pubky/pubky-core.git"
+readonly BUILD_STATE_FILE="$SCRIPT_DIR/.build-state"
 
 usage() {
   cat <<USAGE
@@ -170,22 +173,95 @@ print_repo_summary() {
   log "Prepared $name at $commit."
 }
 
+previous_built_commit() {
+  local service="$1"
+  local existing_service
+  local existing_commit
+
+  [ -f "$BUILD_STATE_FILE" ] || return 0
+
+  while read -r existing_service existing_commit; do
+    if [ "$existing_service" = "$service" ]; then
+      printf '%s\n' "$existing_commit"
+      return 0
+    fi
+  done < "$BUILD_STATE_FILE"
+
+  return 0
+}
+
+mark_service_for_build_if_needed() {
+  local service="$1"
+  local commit="$2"
+  local previous_commit
+
+  PREPARED_COMMITS+=("$service|$commit")
+  previous_commit="$(previous_built_commit "$service")"
+
+  if [ "$previous_commit" = "$commit" ]; then
+    log "Source unchanged for $service; skipping image build."
+    return
+  fi
+
+  BUILD_SERVICES+=("$service")
+}
+
+record_built_commit() {
+  local service="$1"
+  local commit="$2"
+  local state_dir
+  local temp_file
+  local existing_service
+  local existing_commit
+
+  state_dir="$(dirname "$BUILD_STATE_FILE")"
+  temp_file="$BUILD_STATE_FILE.tmp"
+
+  mkdir -p "$state_dir"
+
+  if [ -f "$BUILD_STATE_FILE" ]; then
+    while read -r existing_service existing_commit; do
+      [ -n "$existing_service" ] || continue
+      [ "$existing_service" != "$service" ] || continue
+      printf '%s %s\n' "$existing_service" "$existing_commit"
+    done < "$BUILD_STATE_FILE" > "$temp_file"
+  else
+    : > "$temp_file"
+  fi
+
+  printf '%s %s\n' "$service" "$commit" >> "$temp_file"
+  mv "$temp_file" "$BUILD_STATE_FILE"
+}
+
+record_built_commits() {
+  local entry
+  local service
+  local commit
+
+  for entry in "${PREPARED_COMMITS[@]}"; do
+    IFS='|' read -r service commit <<EOF
+$entry
+EOF
+    record_built_commit "$service" "$commit"
+  done
+}
+
 prepare_repos() {
   local repos=(
-    "pubky-nexus|https://github.com/pubky/pubky-nexus.git|pubky-nexus"
-    "pubky-core|https://github.com/pubky/pubky-core.git|pubky-core"
-    "homegate|https://github.com/pubky/homegate.git|homegate"
+    "pubky-nexus|https://github.com/pubky/pubky-nexus.git|pubky-nexus|nexusd"
+    "pubky-core|https://github.com/pubky/pubky-core.git|pubky-core|homeserver"
+    "homegate|https://github.com/pubky/homegate.git|homegate|homegate"
   )
 
   if [ "$BACKEND_ONLY" = false ]; then
-    repos+=("franky|https://github.com/pubky/pubky-app.git|franky")
+    repos+=("franky|https://github.com/pubky/pubky-app.git|franky|franky")
   fi
 
   local entry
   for entry in "${repos[@]}"; do
-    local name repo_url dir_name target_dir default_branch ref
+    local name repo_url dir_name service target_dir default_branch ref commit
 
-    IFS='|' read -r name repo_url dir_name <<EOF
+    IFS='|' read -r name repo_url dir_name service <<EOF
 $entry
 EOF
 
@@ -195,28 +271,32 @@ EOF
 
     clone_or_update_repo "$name" "$repo_url" "$target_dir" "$ref"
     print_repo_summary "$name" "$target_dir"
+    commit="$(git -C "$target_dir" rev-parse HEAD)"
+    mark_service_for_build_if_needed "$service" "$commit"
   done
 }
 
 build_and_start_stack() {
   local -a compose_base
   local -a profiles
-  local -a services
 
   compose_base=(docker compose --project-directory "$SCRIPT_DIR" --file "$SCRIPT_DIR/docker-compose.yml")
   profiles=(--profile backend)
-  services=(homeserver nexusd homegate)
 
   if [ "$BACKEND_ONLY" = false ]; then
     profiles+=(--profile franky)
-    services+=(franky)
   fi
 
-  log "Building local Pubky images..."
-  "${compose_base[@]}" "${profiles[@]}" build "${services[@]}"
+  if [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then
+    log "Building changed Pubky images: ${BUILD_SERVICES[*]}"
+    "${compose_base[@]}" "${profiles[@]}" build "${BUILD_SERVICES[@]}"
+    record_built_commits
+  else
+    log "No Pubky source changes detected; skipping image build."
+  fi
 
   log "Starting Docker stack..."
-  "${compose_base[@]}" "${profiles[@]}" up -d
+  "${compose_base[@]}" "${profiles[@]}" up
 }
 
 main() {

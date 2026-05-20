@@ -173,6 +173,16 @@ print_repo_summary() {
   log "Prepared $name at $commit."
 }
 
+required_services() {
+  local services=(homeserver nexusd homegate)
+
+  if [ "$BACKEND_ONLY" = false ]; then
+    services+=(franky)
+  fi
+
+  printf '%s\n' "${services[@]}"
+}
+
 previous_built_commit() {
   local service="$1"
   local existing_service
@@ -188,6 +198,53 @@ previous_built_commit() {
   done < "$BUILD_STATE_FILE"
 
   return 0
+}
+
+build_state_is_complete() {
+  local service
+  local commit
+
+  [ -f "$BUILD_STATE_FILE" ] || return 1
+
+  while IFS= read -r service; do
+    commit="$(previous_built_commit "$service")"
+    [ -n "$commit" ] || return 1
+  done < <(required_services)
+}
+
+print_build_state() {
+  local service
+  local commit
+  local short_commit
+
+  log "Existing build state ($BUILD_STATE_FILE):"
+
+  while IFS= read -r service; do
+    commit="$(previous_built_commit "$service")"
+    short_commit="${commit:0:12}"
+    log "  $service: $short_commit"
+  done < <(required_services)
+}
+
+maybe_offer_resume_prompt() {
+  local choice
+
+  build_state_is_complete || return 1
+
+  print_build_state
+  printf '\n[u] Start stack now  [p] Proceed to select refs: ' >&2
+  IFS= read -r choice || choice=""
+
+  choice="$(printf '%s' "$choice" | tr '[:upper:]' '[:lower:]')"
+
+  case "$choice" in
+    p|proceed)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
 }
 
 mark_service_for_build_if_needed() {
@@ -276,6 +333,21 @@ EOF
   done
 }
 
+start_stack() {
+  local -a compose_base
+  local -a profiles
+
+  compose_base=(docker compose --project-directory "$SCRIPT_DIR" --file "$SCRIPT_DIR/docker-compose.yml")
+  profiles=(--profile backend)
+
+  if [ "$BACKEND_ONLY" = false ]; then
+    profiles+=(--profile franky)
+  fi
+
+  log "Starting Docker stack..."
+  "${compose_base[@]}" "${profiles[@]}" up
+}
+
 build_and_start_stack() {
   local -a compose_base
   local -a profiles
@@ -295,15 +367,21 @@ build_and_start_stack() {
     log "No Pubky source changes detected; skipping image build."
   fi
 
-  log "Starting Docker stack..."
-  "${compose_base[@]}" "${profiles[@]}" up
+  start_stack
 }
 
 main() {
   parse_args "$@"
   check_requirements
-  check_github_access
   copy_env_file
+
+  if maybe_offer_resume_prompt; then
+    start_stack
+    log "Pubky Docker stack is running."
+    return
+  fi
+
+  check_github_access
   prepare_repos
   build_and_start_stack
 

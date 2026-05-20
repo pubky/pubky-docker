@@ -305,24 +305,24 @@ EOF
 
 prepare_repos() {
   local repos=(
-    "pubky-nexus|https://github.com/pubky/pubky-nexus.git|pubky-nexus|nexusd"
-    "pubky-core|https://github.com/pubky/pubky-core.git|pubky-core|homeserver"
-    "homegate|https://github.com/pubky/homegate.git|homegate|homegate"
+    "pubky-nexus|https://github.com/pubky/pubky-nexus.git|nexusd"
+    "pubky-core|https://github.com/pubky/pubky-core.git|homeserver"
+    "homegate|https://github.com/pubky/homegate.git|homegate"
   )
 
   if [ "$BACKEND_ONLY" = false ]; then
-    repos+=("franky|https://github.com/pubky/pubky-app.git|franky|franky")
+    repos+=("franky|https://github.com/pubky/pubky-app.git|franky")
   fi
 
   local entry
   for entry in "${repos[@]}"; do
-    local name repo_url dir_name service target_dir default_branch ref commit
+    local name repo_url service target_dir default_branch ref commit
 
-    IFS='|' read -r name repo_url dir_name service <<EOF
+    IFS='|' read -r name repo_url service <<EOF
 $entry
 EOF
 
-    target_dir="$WORKSPACE_DIR/$dir_name"
+    target_dir="$WORKSPACE_DIR/$name"
     default_branch="$(default_branch_for "$repo_url")"
     ref="$(prompt_ref "$name" "$default_branch")"
 

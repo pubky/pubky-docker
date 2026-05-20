@@ -333,21 +333,6 @@ EOF
   done
 }
 
-start_stack() {
-  local -a compose_base
-  local -a profiles
-
-  compose_base=(docker compose --project-directory "$SCRIPT_DIR" --file "$SCRIPT_DIR/docker-compose.yml")
-  profiles=(--profile backend)
-
-  if [ "$BACKEND_ONLY" = false ]; then
-    profiles+=(--profile franky)
-  fi
-
-  log "Starting Docker stack..."
-  "${compose_base[@]}" "${profiles[@]}" up
-}
-
 build_and_start_stack() {
   local -a compose_base
   local -a profiles
@@ -367,7 +352,8 @@ build_and_start_stack() {
     log "No Pubky source changes detected; skipping image build."
   fi
 
-  start_stack
+  log "Starting Docker stack..."
+  "${compose_base[@]}" "${profiles[@]}" up
 }
 
 main() {
@@ -375,16 +361,12 @@ main() {
   check_requirements
   copy_env_file
 
-  if maybe_offer_resume_prompt; then
-    start_stack
-    log "Pubky Docker stack is running."
-    return
+  if ! maybe_offer_resume_prompt; then
+    check_github_access
+    prepare_repos
   fi
 
-  check_github_access
-  prepare_repos
   build_and_start_stack
-
   log "Pubky Docker stack is running."
 }
 

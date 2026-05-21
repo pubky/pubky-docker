@@ -20,12 +20,12 @@ Only run this full orchestration if you are experimenting with the complete stac
 
 ## Local Setup From Source (Recommended)
 
-For contributors and local development, use `pubky-docker.sh`. It clones the service repositories, checks out the refs you choose, builds Pubky images from source, and starts the stack. The public Docker registry is not used for Pubky services on this path.
+For contributors and local development, use `pubky-docker-cli.sh`. It clones the service repositories, checks out the refs you choose, builds Pubky images from source, and starts the stack. The public Docker registry is not used for Pubky services on this path.
 
 Run the script from this directory:
 
 ```bash
-./pubky-docker.sh
+./pubky-docker-cli.sh
 ```
 
 The script will:
@@ -46,7 +46,7 @@ The directory containing this project can be named `pubky-docker`, `docker`, or 
 If you want to run your own frontend separately:
 
 ```bash
-./pubky-docker.sh --backend-only
+./pubky-docker-cli.sh --backend-only
 ```
 
 This still clones, builds, and runs `pubky-core`, `pubky-nexus`, and `homegate`.
@@ -69,7 +69,7 @@ your_working_directory/
 Run the script again to pick new refs:
 
 ```bash
-./pubky-docker.sh
+./pubky-docker-cli.sh
 ```
 
 For existing repositories, the script refuses to change refs if there are local changes. Commit, stash, or clean those changes first, then rerun.

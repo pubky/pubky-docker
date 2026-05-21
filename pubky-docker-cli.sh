@@ -232,13 +232,13 @@ maybe_offer_resume_prompt() {
   build_state_is_complete || return 1
 
   print_build_state
-  printf '\n[u] Start stack now  [p] Proceed to select refs: ' >&2
+  printf '\n[s] Start stack now  [c] Choose refs: ' >&2
   IFS= read -r choice || choice=""
 
   choice="$(printf '%s' "$choice" | tr '[:upper:]' '[:lower:]')"
 
   case "$choice" in
-    p|proceed)
+    c|choose)
       return 1
       ;;
     *)

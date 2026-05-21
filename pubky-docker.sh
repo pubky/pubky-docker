@@ -21,7 +21,7 @@ Clone the Pubky service repositories next to this directory, check out the
 selected refs, build the local Docker images, and start the Docker stack.
 
 Options:
-  --backend-only  Skip the franky frontend service.
+  --backend-only  Skip the pubky-app frontend service.
   --help          Show this help text.
 USAGE
 }
@@ -177,7 +177,7 @@ required_services() {
   local services=(homeserver nexusd homegate)
 
   if [ "$BACKEND_ONLY" = false ]; then
-    services+=(franky)
+    services+=(pubky-app)
   fi
 
   printf '%s\n' "${services[@]}"
@@ -311,7 +311,7 @@ prepare_repos() {
   )
 
   if [ "$BACKEND_ONLY" = false ]; then
-    repos+=("franky|https://github.com/pubky/pubky-app.git|franky")
+    repos+=("pubky-app|https://github.com/pubky/pubky-app.git|pubky-app")
   fi
 
   local entry
@@ -341,7 +341,7 @@ build_and_start_stack() {
   profiles=(--profile backend)
 
   if [ "$BACKEND_ONLY" = false ]; then
-    profiles+=(--profile franky)
+    profiles+=(--profile pubky-app)
   fi
 
   if [ "${#BUILD_SERVICES[@]}" -gt 0 ]; then

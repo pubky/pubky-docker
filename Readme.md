@@ -1,19 +1,28 @@
 # Pubky Docker
 
-Run a local Pubky stack from source. The Pubky service images are built from local Git checkouts rather than pulled from the Docker registry, because the registry images are not currently the source of truth for local development.
-
-This orchestration can run:
+One-click setup to run a local Pubky Social stack. This orchestration can run:
 
 - [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver), from `pubky/pubky-core`
 - [Pubky Nexus](https://github.com/pubky/pubky-nexus), from `pubky/pubky-nexus`
 - [Homegate](https://github.com/pubky/homegate), from `pubky/homegate`
-- [Pubky App](https://github.com/pubky/pubky-app), run as the `pubky-app` Compose service
+- [Pubky App](https://github.com/pubky/pubky-app), as the `pubky-app` Compose service
 
-Third-party infrastructure images such as Postgres, Neo4j, Redis, Redis Insight, and WireMock may still be pulled by Docker.
+Third-party infrastructure images (Postgres, Neo4j, Redis, Redis Insight, WireMock) are pulled from their public registries.
 
-## Quick Start
+## Warning
 
-Run the setup script from this directory:
+Running the full stack is overkill if your goal is only to develop an application using Pubky. For application development, use the official client libraries instead:
+
+- JavaScript: https://www.npmjs.com/package/@synonymdev/pubky
+- Rust: https://crates.io/crates/pubky
+
+Only run this full orchestration if you are experimenting with the complete stack, especially the Nexus indexer and the social frontend.
+
+## Local Setup From Source (Recommended)
+
+For contributors and local development, use `pubky-docker.sh`. It clones the service repositories, checks out the refs you choose, builds Pubky images from source, and starts the stack. The public Docker registry is not used for Pubky services on this path.
+
+Run the script from this directory:
 
 ```bash
 ./pubky-docker.sh
@@ -24,24 +33,25 @@ The script will:
 - Check that `git`, Docker, and Docker Compose are available.
 - Check that Git can read from GitHub before attempting clones.
 - Copy `.env-sample` to `.env` if `.env` does not already exist.
+- If `.build-state` has a complete record for the selected services, list those commits and offer to start the stack immediately or proceed to ref selection.
 - Ask for a commit, tag, or branch for each service. Press Enter to use the head of the repository's default branch.
 - Clone or update the service repositories next to this directory.
-- Build local Docker images for Pubky services whose checked-out source commit changed.
+- Build local Docker images only for services whose checked-out commit changed.
 - Start the stack with Docker Compose.
 
 The directory containing this project can be named `pubky-docker`, `docker`, or anything else. Repositories are cloned beside that directory.
 
-## Backend Only
+### Backend Only
 
-If you want to run your own frontend separately, skip the `pubky-app` service:
+If you want to run your own frontend separately:
 
 ```bash
 ./pubky-docker.sh --backend-only
 ```
 
-This still clones, builds, and runs the backend services: `pubky-core`, `pubky-nexus`, and `homegate`.
+This still clones, builds, and runs `pubky-core`, `pubky-nexus`, and `homegate`.
 
-## Directory Layout
+### Directory Layout
 
 After running the script, your workspace will look similar to this:
 
@@ -54,27 +64,61 @@ your_working_directory/
 └── pubky-app/
 ```
 
-## Re-running With Different Refs
+### Re-running
 
-Run the script again and enter new refs when prompted:
+Run the script again to pick new refs:
 
 ```bash
 ./pubky-docker.sh
 ```
 
-For existing repositories, the script refuses to change refs if there are local changes. Commit, stash, or clean those changes first, then rerun the script.
+For existing repositories, the script refuses to change refs if there are local changes. Commit, stash, or clean those changes first, then rerun.
 
-The script records the last built commit for each Compose service in `.storage/pubky-docker-builds`. On subsequent runs, services at the same commit skip the explicit image build step.
+The script records the last built commit per Compose service in `.build-state`. On later runs, unchanged services skip the image build step. If `.build-state` is complete for your selected profile set, you can start the stack without going through ref selection again.
 
-## Manual Compose Commands
+## Using Public Docker Images
 
-The script is the recommended path, but the Compose profiles can also be used directly after repositories have been prepared:
+All Pubky service images are published on the public [Synonymsoft registry](https://hub.docker.com/u/synonymsoft). By default, Compose uses the `latest` tag.
+
+Image tags and registry can be overridden in `.env`:
+
+```text
+REGISTRY          # default: synonymsoft
+HOMESERVER_TAG    # default: latest
+PUBKY_NEXUS_TAG   # default: latest
+PUBKY_APP_TAG     # default: latest
+HOMEGATE_TAG      # default: latest
+```
+
+Copy `.env-sample` to `.env` and set your preferences for `mainnet` or `testnet`:
+
+```bash
+cp .env-sample .env
+```
+
+Start the full stack (profiles are set via `COMPOSE_PROFILES` in `.env`):
+
+```bash
+docker compose up -d
+```
+
+Backend only:
+
+```bash
+docker compose --profile backend up -d
+```
+
+This path does not clone or build service repositories. You only need the compose files from this project and a configured `.env`.
+
+## Manual Compose (After Preparing Repositories)
+
+If you have already cloned the service repositories and checked out refs yourself, you can use Compose directly:
 
 ```bash
 docker compose --profile backend --profile pubky-app up -d
 ```
 
-For backend only:
+Backend only:
 
 ```bash
 docker compose --profile backend up -d

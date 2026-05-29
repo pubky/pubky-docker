@@ -11,3 +11,8 @@ public_ip = "172.18.0.4"
 
 [derive]
 testnet_host = "homeserver"
+
+[admin]
+enabled = true
+listen_socket = "0.0.0.0:6288"
+admin_password = "admin"

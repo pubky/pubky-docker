@@ -24,7 +24,7 @@ services:
   homeserver:
     profiles: [backend]
     container_name: homeserver
-    image: "${REGISTRY:-synonymsoft}/homeserver:${HOMESERVER_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/homeserver-${HOMESERVER_ENV:-testnet}:${HOMESERVER_TAG:-latest}"
     restart: always
     build:
       context: ../pubky-core

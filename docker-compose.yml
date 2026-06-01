@@ -24,7 +24,7 @@ services:
   homeserver:
     profiles: [backend]
     container_name: homeserver
-    image: "${REGISTRY:-synonymsoft}/homeserver:${HOMESERVER_TAG:-latest}"
+    image: "${REGISTRY:-synonymsoft}/homeserver-${HOMESERVER_ENV:-testnet}:${HOMESERVER_TAG:-latest}"
     restart: always
     build:
       context: ../pubky-core
@@ -126,13 +126,13 @@ services:
       - nexus-redis
     restart: always
 
-  # 4. Franky Social UI
-  franky:
-    profiles: [franky]
-    container_name: franky
-    image: "${REGISTRY:-synonymsoft}/franky-${NETWORK:-testnet}:${FRANKY_TAG:-latest}"
+  # 4. Pubky App Social UI
+  pubky-app:
+    profiles: [pubky-app]
+    container_name: pubky-app
+    image: "${REGISTRY:-synonymsoft}/pubky-app-${NETWORK:-testnet}:${PUBKY_APP_TAG:-latest}"
     build:
-      context: ../franky
+      context: ../pubky-app
       args:
         NEXT_PUBLIC_DB_VERSION: ${NEXT_PUBLIC_DB_VERSION:-2}
         NEXT_PUBLIC_DB_NAME: ${NEXT_PUBLIC_DB_NAME:-franky}
@@ -163,6 +163,7 @@ services:
         NEXT_PUBLIC_HOMEGATE_URL: ${NEXT_PUBLIC_HOMEGATE_URL:-http://localhost:6300}
         NEXT_PUBLIC_MODERATION_ID: ${NEXT_PUBLIC_MODERATION_ID:-euwmq57zefw5ynnkhh37b3gcmhs7g3cptdbw1doaxj1pbmzp3wro}
         NEXT_PUBLIC_MODERATED_TAGS: ${NEXT_PUBLIC_MODERATED_TAGS:-["nudity"]}
+        NEXT_ENABLE_PLAUSIBLE: ${NEXT_ENABLE_PLAUSIBLE:-false}
         BASE_URL_SUPPORT: ${BASE_URL_SUPPORT:-https://support.pubky.app}
         SUPPORT_API_ACCESS_TOKEN: ${SUPPORT_API_ACCESS_TOKEN:-test-token}
         SUPPORT_ACCOUNT_ID: ${SUPPORT_ACCOUNT_ID:-1}

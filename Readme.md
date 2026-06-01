@@ -1,93 +1,125 @@
-# 💻 Pubky Docker
+# Pubky Docker
 
-One click setup to run locally an example full Pubky Social (App) stack. This orchestration will run:
+One-click setup to run a local Pubky Social stack. This orchestration can run:
 
-- [Pkarr relay](https://github.com/pubky/pkarr):
-- [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver): Instance of pubky decentralized data storage.
-- [Pubky Nexus](https://github.com/pubky/pubky-nexus): aggregator and indexer of `/pub/pubky.app` data that creates a powerful social-media-like API
-- [Pubky App](https://github.com/pubky/pubky-app): client for the pubky social media app.
+- [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver), from `pubky/pubky-core`
+- [Pubky Nexus](https://github.com/pubky/pubky-nexus), from `pubky/pubky-nexus`
+- [Homegate](https://github.com/pubky/homegate), from `pubky/homegate`
+- [Pubky App](https://github.com/pubky/pubky-app), as the `pubky-app` Compose service
 
-## ⚠️ Warning
+Third-party infrastructure images (Postgres, Neo4j, Redis, Redis Insight, WireMock) are pulled from their public registries.
 
-Running the full stack is overkill if your goal is only to develop an application using Pubky.
+## Warning
 
-For application development, use the official client libraries instead:
+Running the full stack is overkill if your goal is only to develop an application using Pubky. For application development, use the official client libraries instead:
 
 - JavaScript: https://www.npmjs.com/package/@synonymdev/pubky
 - Rust: https://crates.io/crates/pubky
 
-Only run this full orchestration if you're specifically experimenting with the complete stack with interest on the Nexus indexer and the social frontend client.
+Only run this full orchestration if you are experimenting with the complete stack, especially the Nexus indexer and the social frontend.
 
-## Using public docker images
+## Local Setup From Source (Recommended)
 
-All images are stored in public [registry](https://hub.docker.com/u/synonymsoft) and by default the `latest` tag is used.
+For contributors and local development, use `pubky-docker-cli.sh`. It clones the service repositories, checks out the refs you choose, builds Pubky images from source, and starts the stack. The public Docker registry is not used for Pubky services on this path.
 
-The image tag and registry are environment variables, so if needed they could be changed
+Run the script from this directory:
 
-```
-REGISTRY - registry by default synonymsoft
-PUBKY_APP_TAG - tag for pubky-app/client by default latest
-PUBKY_NEXUS_TAG - tag for pubky-nexus by default latest
-HOMESERVER_TAG - tag for homeserver by default latest
-PKARR_TAG - tag for pkarr by default latest
+```bash
+./pubky-docker-cli.sh
 ```
 
-Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
+The script will:
 
-Run:
+- Check that `git`, Docker, and Docker Compose are available.
+- Check that Git can read from GitHub before attempting clones.
+- Copy `.env-sample` to `.env` if `.env` does not already exist.
+- If `.build-state` has a complete record for the selected services, list those commits and offer to start the stack immediately or proceed to ref selection.
+- Ask for a commit, tag, or branch for each service. Press Enter to use the head of the repository's default branch.
+- Clone or update the service repositories next to this directory.
+- Build local Docker images only for services whose checked-out commit changed.
+- Start the stack with Docker Compose.
 
+The directory containing this project can be named `pubky-docker`, `docker`, or anything else. Repositories are cloned beside that directory.
+
+### Backend Only
+
+If you want to run your own frontend separately:
+
+```bash
+./pubky-docker-cli.sh --backend-only
 ```
+
+This still clones, builds, and runs `pubky-core`, `pubky-nexus`, and `homegate`.
+
+### Directory Layout
+
+After running the script, your workspace will look similar to this:
+
+```text
+your_working_directory/
+├── pubky-docker/
+├── pubky-core/
+├── pubky-nexus/
+├── homegate/
+└── pubky-app/
+```
+
+### Re-running
+
+Run the script again to pick new refs:
+
+```bash
+./pubky-docker-cli.sh
+```
+
+For existing repositories, the script refuses to change refs if there are local changes. Commit, stash, or clean those changes first, then rerun.
+
+The script records the last built commit per Compose service in `.build-state`. On later runs, unchanged services skip the image build step. If `.build-state` is complete for your selected profile set, you can start the stack without going through ref selection again.
+
+## Using Public Docker Images
+
+All Pubky service images are published on the public [Synonymsoft registry](https://hub.docker.com/u/synonymsoft). By default, Compose uses the `latest` tag.
+
+Image tags and registry can be overridden in `.env`:
+
+```text
+REGISTRY          # default: synonymsoft
+HOMESERVER_TAG    # default: latest
+PUBKY_NEXUS_TAG   # default: latest
+PUBKY_APP_TAG     # default: latest
+HOMEGATE_TAG      # default: latest
+```
+
+Copy `.env-sample` to `.env` and set your preferences for `mainnet` or `testnet`:
+
+```bash
+cp .env-sample .env
+```
+
+Start the full stack (profiles are set via `COMPOSE_PROFILES` in `.env`):
+
+```bash
 docker compose up -d
 ```
 
-## Building from scratch
+Backend only:
 
-### ⚙️ Setup
-
-This setup builds directly from the `pubky/pkarr`, `pubky/pubky-core`, `pubky/pubky-nexus`, and `pubky/pubky-app` repositories.
-
-Make a copy of `.env-sample` into `.env` and set your preferences for `mainnet` or `testnet`.
-
-To run entire stack:
 ```bash
-docker compose up
+docker compose --profile backend up -d
 ```
 
-To run without pubky-app client:
+This path does not clone or build service repositories. You only need the compose files from this project and a configured `.env`.
+
+## Manual Compose (After Preparing Repositories)
+
+If you have already cloned the service repositories and checked out refs yourself, you can use Compose directly:
+
 ```bash
-docker compose --profile backend up
+docker compose --profile backend --profile pubky-app up -d
 ```
 
-### 📁 Directory Structure Requirement
+Backend only:
 
-Before running `docker compose up`, ensure the following four repositories are cloned **at the same directory level** as `pubky-docker`. This is necessary because the Docker setup references them via relative paths.
-
-Your directory should look like this:
-
-```
-your_working_directory/
-├── pubky-docker/ # this project!
-├── pkarr/
-├── pubky-core/
-├── pubky-nexus/
-├── pubky-app/
-```
-
-Clone each required repository:
-
-```
-git clone https://github.com/pubky/pubky-docker.git # this repository
-git clone https://github.com/pubky/pkarr.git
-git clone https://github.com/pubky/pubky-core.git
-git clone https://github.com/pubky/pubky-nexus.git
-git clone https://github.com/pubky/pubky-app.git
-```
-
-Then navigate into `pubky-docker`, configure your `.env`, and run:
-
-```
-cd pubky-docker
-cp .env-sample .env
-# edit .env to choose between mainnet or testnet
-docker compose up
+```bash
+docker compose --profile backend up -d
 ```

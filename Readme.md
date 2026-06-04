@@ -1,5 +1,9 @@
 # Pubky Docker
 
+> [!WARNING]
+> This project is intended for local development and experimentation only. It is not production hosting infrastructure.
+> Do not use it to run public, production, or mission-critical Pubky services; production deployments require infrastructure that is hardened, monitored, maintained, and operated for that purpose.
+
 One-click setup to run a local Pubky Social stack. This orchestration can run:
 
 - [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver), from `pubky/pubky-core`

@@ -36,13 +36,13 @@ PUBKY_APP_TAG     # default: latest
 HOMEGATE_TAG      # default: latest
 ```
 
-Copy `.env-sample` to `.env` and set your preferences for `mainnet` or `testnet`:
+Copy `.env-sample` to `.env` for default `testnet` config:
 
 ```bash
 cp .env-sample .env
 ```
 
-Start the full stack (profiles are set via `COMPOSE_PROFILES` in `.env`):
+Start the full stack:
 
 ```bash
 docker compose up -d

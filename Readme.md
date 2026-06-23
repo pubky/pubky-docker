@@ -42,16 +42,24 @@ Copy `.env-sample` to `.env` for default `testnet` config:
 cp .env-sample .env
 ```
 
+The sample `.env` sets `COMPOSE_PROFILES=backend,pubky-app`, so `docker compose up` starts the full stack by default.
+
 Start the full stack:
 
 ```bash
-docker compose up -d
+docker compose up -d --pull always --no-build
 ```
 
-Backend only:
+Homeserver only:
 
 ```bash
-docker compose --profile backend up -d
+docker compose --profile homeserver up -d --pull always --no-build
+```
+
+Backend only (backend for pubky.app instance):
+
+```bash
+docker compose --profile backend up -d --pull always --no-build
 ```
 
 This path does not clone or build service repositories. You only need the compose files from this project and a configured `.env`.
@@ -63,13 +71,19 @@ This path does not clone or build service repositories. You only need the compos
 If you have already cloned the service repositories and checked out refs yourself, you can use Compose directly:
 
 ```bash
-docker compose --profile backend --profile pubky-app up -d
+docker compose up -d --build
 ```
 
-Backend only (If you want to run your own frontend separately):
+Homeserver only:
 
 ```bash
-docker compose --profile backend up -d
+docker compose --profile homeserver up -d --build
+```
+
+Backend only (If you want to run your own pubky.app frontend separately):
+
+```bash
+docker compose --profile backend up -d --build
 ```
 
 ### CLI
@@ -125,4 +139,3 @@ Run the script again to pick new refs:
 For existing repositories, the script refuses to change refs if there are local changes. Commit, stash, or clean those changes first, then rerun.
 
 The script records the last built commit per Compose service in `.build-state`. On later runs, unchanged services skip the image build step. If `.build-state` is complete for your selected profile set, you can start the stack without going through ref selection again.
-

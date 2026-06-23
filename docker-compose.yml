@@ -1,7 +1,7 @@
 services:
   # 1. PostgreSQL (shared by Homeserver and Homegate)
   postgres:
-    profiles: [backend]
+    profiles: [backend, homeserver]
     container_name: postgres
     image: postgres:17-alpine
     restart: always
@@ -22,7 +22,7 @@ services:
 
   # 2. Pubky Homeserver
   homeserver:
-    profiles: [backend]
+    profiles: [backend, homeserver]
     container_name: homeserver
     image: "${REGISTRY:-synonymsoft}/homeserver-${HOMESERVER_ENV:-testnet}:${HOMESERVER_TAG:-latest}"
     restart: always

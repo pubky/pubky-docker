@@ -60,10 +60,16 @@ This path does not clone or build service repositories. You only need the compos
 
 ### Manual Compose
 
-If you have already cloned the service repositories and checked out refs yourself, you can use Compose directly:
+If you have already cloned the service repositories and checked out refs yourself, build the local images first:
 
 ```bash
-docker compose --profile backend --profile pubky-app up -d
+docker compose build
+```
+
+Then start the full stack:
+
+```bash
+docker compose up -d
 ```
 
 Backend only (If you want to run your own frontend separately):

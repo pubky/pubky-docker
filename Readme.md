@@ -45,13 +45,13 @@ cp .env-sample .env
 Start the full stack:
 
 ```bash
-docker compose up -d
+docker compose up -d --no-build
 ```
 
 Backend only:
 
 ```bash
-docker compose --profile backend up -d
+docker compose --profile backend up -d --no-build
 ```
 
 This path does not clone or build service repositories. You only need the compose files from this project and a configured `.env`.

@@ -62,6 +62,12 @@ This path does not clone or build service repositories. You only need the compos
 
 If you have already cloned the service repositories and checked out refs yourself, build the local images first:
 
+Copy `.env-sample` to `.env` for default `testnet` config:
+
+```bash
+cp .env-sample .env
+```
+
 ```bash
 docker compose build
 ```

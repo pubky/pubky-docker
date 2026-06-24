@@ -59,7 +59,7 @@ compose() {
 }
 
 all_services() {
-  compose config --services | sed '/^[[:space:]]*services:[[:space:]]*$/d'
+  compose --profile '*' config --services | sed '/^[[:space:]]*services:[[:space:]]*$/d'
 }
 
 service_is_available() {

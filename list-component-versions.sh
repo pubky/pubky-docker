@@ -7,7 +7,8 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 NOT_RUNNING_SERVICES=()
 PUBKY_SERVICES=(homeserver nexusd homegate pubky-app)
-SUPPORTING_SERVICES=(postgres nexus-redis nexus-redisinsight nexus-neo4j homegate-db-init homegate-prelude)
+SUPPORTING_SERVICES=(postgres nexus-redis nexus-redisinsight nexus-neo4j homegate-prelude)
+EXCLUDED_SERVICES=(homegate-db-init)
 
 usage() {
   cat <<USAGE
@@ -67,6 +68,17 @@ service_is_available() {
   local service
 
   for service in "${available_services[@]}"; do
+    [ "$service" = "$needle" ] && return 0
+  done
+
+  return 1
+}
+
+service_is_excluded() {
+  local needle="$1"
+  local service
+
+  for service in "${EXCLUDED_SERVICES[@]}"; do
     [ "$service" = "$needle" ] && return 0
   done
 
@@ -160,7 +172,7 @@ version_probe_for_service() {
   local service="$1"
 
   case "$service" in
-    postgres|homegate-db-init)
+    postgres)
       printf '%s\n' 'postgres --version || psql --version'
       ;;
     homeserver)
@@ -274,6 +286,7 @@ main() {
 
   while IFS= read -r service; do
     [ -n "$service" ] || continue
+    service_is_excluded "$service" && continue
     available_services+=("$service")
   done < <(all_services)
 

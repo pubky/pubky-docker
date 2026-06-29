@@ -138,3 +138,10 @@ For existing repositories, the script refuses to change refs if there are local 
 
 The script records the last built commit per Compose service in `.build-state`. On later runs, unchanged services skip the image build step. If `.build-state` is complete for your selected profile set, you can start the stack without going through ref selection again.
 
+## Listing Component Versions
+
+With the stack running, run `list-component-versions.sh` to inspect version numbers of components (for example homeserver or nexus):
+
+```bash
+./list-component-versions.sh
+```

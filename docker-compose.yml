@@ -13,7 +13,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - 5432:5432
+      - 127.0.0.1:5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 5s
@@ -38,11 +38,11 @@ services:
       pubky:
         ipv4_address: "172.18.0.4"
     ports:
-      - 6287:6287
-      - 6286:6286
-      - 6288:6288
-      - 15411:15411
-      - 15412:15412
+      - 127.0.0.1:6287:6287
+      - 127.0.0.1:6286:6286
+      - 127.0.0.1:6288:6288
+      - 127.0.0.1:15411:15411
+      - 127.0.0.1:15412:15412
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,8 +63,8 @@ services:
       # Mount the config file
       - ./pubky-nexus-config-${NETWORK:-testnet}.toml:/config/config.toml
     ports:
-      - 8080:8080
-      - 8081:8081
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:8081:8081
     networks:
       pubky:
         ipv4_address: "172.18.0.3"
@@ -79,8 +79,8 @@ services:
     container_name: nexus-neo4j
     restart: unless-stopped
     ports:
-      - 7474:7474
-      - 7687:7687
+      - 127.0.0.1:7474:7474
+      - 127.0.0.1:7687:7687
     networks:
       pubky:
         ipv4_address: "172.18.0.5"
@@ -100,7 +100,7 @@ services:
     image: redis:8.0.6-alpine
     container_name: nexus-redis
     ports:
-      - 6379:6379
+      - 127.0.0.1:6379:6379
     networks:
       pubky:
         ipv4_address: "172.18.0.6"
@@ -115,7 +115,7 @@ services:
     image: redis/redisinsight:3.0.3
     container_name: nexus-redisinsight
     ports:
-      - 5540:5540
+      - 127.0.0.1:5540:5540
     networks:
       pubky:
         ipv4_address: "172.18.0.7"
@@ -174,7 +174,7 @@ services:
       pubky:
         ipv4_address: "172.18.0.8"
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
 
   # 5. Homegate
   # 5.1 PostgreSQL init for Homegate
@@ -233,7 +233,7 @@ services:
       pubky:
         ipv4_address: "172.18.0.10"
     ports:
-      - 6300:6300
+      - 127.0.0.1:6300:6300
     depends_on:
       homeserver:
         condition: service_started

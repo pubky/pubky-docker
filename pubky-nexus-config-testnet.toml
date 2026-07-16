@@ -6,8 +6,6 @@ pubky_listen_socket = "0.0.0.0:8081"
 
 [watcher]
 name = "nexusd.watcher"
-testnet = true
-testnet_host = "homeserver"
 homeserver = "8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo"
 events_limit = 1000
 monitored_homeservers_limit = 0
@@ -18,6 +16,10 @@ moderated_tags = []
 [stack]
 log_level = "debug"
 files_path = "/static/files/"
+
+[stack.net]
+testnet = true
+testnet_host = "homeserver"
 
 [stack.db]
 redis = "redis://nexus-redis:6379"

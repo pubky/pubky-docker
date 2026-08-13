@@ -10,7 +10,7 @@ BACKEND_ONLY=false
 BUILD_SERVICES=()
 PREPARED_COMMITS=()
 
-readonly GITHUB_CHECK_REPO="https://github.com/pubky/pubky-core.git"
+readonly GITHUB_CHECK_REPO="https://github.com/pubky/pubky-homeserver.git"
 readonly BUILD_STATE_FILE="$SCRIPT_DIR/.build-state"
 
 usage() {
@@ -306,7 +306,7 @@ EOF
 prepare_repos() {
   local repos=(
     "pubky-nexus|https://github.com/pubky/pubky-nexus.git|nexusd"
-    "pubky-core|https://github.com/pubky/pubky-core.git|homeserver"
+    "pubky-homeserver|https://github.com/pubky/pubky-homeserver.git|homeserver"
     "homegate|https://github.com/pubky/homegate.git|homegate"
   )
 

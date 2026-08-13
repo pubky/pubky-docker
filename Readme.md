@@ -6,7 +6,7 @@
 
 One-click setup to run a local Pubky Social stack. This orchestration can run:
 
-- [Pubky Homeserver](https://github.com/pubky/pubky-core/tree/main/pubky-homeserver), from `pubky/pubky-core`
+- [Pubky Homeserver](https://github.com/pubky/pubky-homeserver/tree/main/pubky-homeserver), from `pubky/pubky-homeserver`
 - [Pubky Nexus](https://github.com/pubky/pubky-nexus), from `pubky/pubky-nexus`
 - [Homegate](https://github.com/pubky/homegate), from `pubky/homegate`
 - [Pubky App](https://github.com/pubky/pubky-app), as the `pubky-app` Compose service
@@ -120,7 +120,7 @@ After running the script, your workspace will look similar to this:
 ```text
 your_working_directory/
 ├── pubky-docker/
-├── pubky-core/
+├── pubky-homeserver/
 ├── pubky-nexus/
 ├── homegate/
 └── pubky-app/

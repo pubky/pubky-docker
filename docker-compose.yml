@@ -27,7 +27,7 @@ services:
     image: "${REGISTRY:-synonymsoft}/homeserver-${HOMESERVER_ENV:-testnet}:${HOMESERVER_TAG:-latest}"
     restart: always
     build:
-      context: ../pubky-core
+      context: ../pubky-homeserver
     volumes:
       - ./homeserver.config.toml:/config.toml
       - ./homeserver.entrypoint.sh:/entrypoint.sh

@@ -24,13 +24,13 @@ Only run this full orchestration if you are experimenting with the complete stac
 
 ## Using Public Docker Images (Recommended)
 
-All Pubky service images are published on the public [Synonymsoft registry](https://hub.docker.com/u/synonymsoft). By default, Compose uses the `latest` tag.
+All Pubky service images are published on the public [Synonymsoft registry](https://hub.docker.com/u/synonymsoft). By default, Compose uses Pubky Homeserver `v0.11.0` and the `latest` tag for the other services.
 
 Image tags and registry can be overridden in `.env`:
 
 ```text
 REGISTRY          # default: synonymsoft
-HOMESERVER_TAG    # default: latest
+HOMESERVER_TAG    # default: v0.11.0
 PUBKY_NEXUS_TAG   # default: latest
 PUBKY_APP_TAG     # default: latest
 HOMEGATE_TAG      # default: latest

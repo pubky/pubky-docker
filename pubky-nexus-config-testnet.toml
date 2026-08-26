@@ -27,3 +27,15 @@ redis = "redis://nexus-redis:6379"
 [stack.db.neo4j]
 uri = "bolt://nexus-neo4j:7687"
 password = "12345678"
+
+# Nightly recompute of the seeded PageRank trust scores that rank the
+# starter-pack stream. Without a schedule the job never fires and every score
+# stays null, which silently degrades that ranking to endorsement counts.
+[jobs.trust-recompute]
+cron = "0 0 3 * * *"
+
+[trust_rank]
+# PLACEHOLDER, must be replaced before this has any effect. Trust radiates from
+# these accounts, so the list decides what the whole graph considers reputable.
+# The job refuses to run while this is empty.
+seed = []

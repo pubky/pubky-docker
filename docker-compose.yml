@@ -28,6 +28,8 @@ services:
     restart: always
     build:
       context: ../pubky-homeserver
+      args:
+        BUILD_TARGET: ${HOMESERVER_ENV:-testnet}
     volumes:
       - ./homeserver.config.toml:/config.toml
       - ./homeserver.entrypoint.sh:/entrypoint.sh

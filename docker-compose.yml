@@ -77,7 +77,11 @@ services:
   # 3.2 Pubky Nexus Graph
   nexus-neo4j:
     profiles: [backend]
-    image: neo4j:5.26.7-community
+    # Neo4j with the Graph Data Science plugin baked in, built from the nexus
+    # submodule so it stays in step with what nexus tests against. Stock
+    # community has no GDS, which leaves trust scores null.
+    build: ../pubky-nexus/docker/neo4j
+    image: pubky-nexus/neo4j:5.26.27-gds2.13.10
     container_name: nexus-neo4j
     restart: unless-stopped
     ports:

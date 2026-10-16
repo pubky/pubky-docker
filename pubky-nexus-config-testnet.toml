@@ -5,6 +5,8 @@ public_addr = "0.0.0.0:8080"
 pubky_listen_socket = "0.0.0.0:8081"
 
 [watcher]
+testnet = true
+testnet_host = "homeserver"
 name = "nexusd.watcher"
 homeserver = "8pinxxgqs41n4aididenw5apqp1urfmzdztr8jt4abrkdn435ewo"
 events_limit = 1000

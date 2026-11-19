@@ -99,7 +99,7 @@ services:
   # 3.3 Pubky Nexus Index
   nexus-redis:
     profiles: [backend]
-    image: redis:8.0.6-alpine
+    image: redis:8.2-alpine
     container_name: nexus-redis
     ports:
       - 6379:6379
@@ -114,7 +114,7 @@ services:
 
   nexus-redisinsight:
     profiles: [backend]
-    image: redis/redisinsight:3.0.3
+    image: redis/redisinsight:3.8.0
     container_name: nexus-redisinsight
     ports:
       - 5540:5540
